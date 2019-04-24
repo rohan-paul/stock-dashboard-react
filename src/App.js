@@ -3,6 +3,7 @@ import { Route, BrowserRouter, Switch, Router, Link } from "react-router-dom";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core";
 import history from "./history";
 import SubscriberList from "./Components/Subscriber/SubscriberList";
+import BitCoin from "./Components/BitCoin/BitCoin";
 import NotFound from "./Components/NotFound";
 import ComponentHeader from "./Components/ComponentHeader";
 
@@ -75,6 +76,7 @@ class App extends Component {
                       />
                     )}
                   />
+                  <Route exact path="/bitcoin" component={BitCoin} />
                   <Route component={NotFound} />
                 </Switch>
               </div>

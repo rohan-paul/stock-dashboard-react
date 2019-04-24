@@ -38,3 +38,23 @@ Analytics.propTypes = {
 };
 
 export default withStyles(styles)(Analytics);
+
+/*
+  componentDidMount() {
+    axios
+      .get(
+        "https://www.quandl.com/api/v3/datasets/MULTPL/SP500_PE_RATIO_MONTH.json?api_key=xVgPxg_akYvyDdHhqEox"
+      )
+      .then(res => {
+        this.setState({
+          s_and_p_500_pe_ratio: res.data.dataset.data
+        });
+      });
+  }
+
+
+   this.state = {
+      s_and_p_500_pe_ratio: []
+    };
+
+*/

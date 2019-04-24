@@ -45,8 +45,6 @@ class SandP500_PE extends React.Component {
     });
   }
   render() {
-    const width = 800;
-    const height = 500;
     const margin = {
       top: 60,
       bottom: 60,
@@ -55,6 +53,8 @@ class SandP500_PE extends React.Component {
     };
 
     const {
+      width,
+      height,
       hideTooltip,
       tooltipData,
       tooltipTop,
@@ -81,7 +81,6 @@ class SandP500_PE extends React.Component {
     return (
       <div>
         <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {console.log("DATA IS", stock)}
           <rect
             x={0}
             y={0}
