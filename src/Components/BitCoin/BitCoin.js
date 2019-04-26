@@ -1,42 +1,54 @@
-import React, { Component } from "react";
-import { Line, Bar, LinePath } from "@vx/shape";
+import React from "react";
+import { AreaClosed, Line, Bar } from "@vx/shape";
+import { appleStock } from "@vx/mock-data";
+import { curveMonotoneX } from "@vx/curve";
+import { GridRows, GridColumns } from "@vx/grid";
+import { scaleTime, scaleLinear } from "@vx/scale";
 import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
-import { scaleTime, scaleLinear } from "@vx/scale";
-import { extent, max, bisector } from "d3-array";
+import { bisector } from "d3-array";
 import { timeFormat } from "d3-time-format";
 
-const width = window.innerWidth;
-const height = window.innerHeight;
+// const stock = appleStock.slice(800);
 
+// util
 const formatDate = timeFormat("%b %d, '%y");
-const xSelector = d => new Date(d.date);
-const ySelector = d => d.price;
+const min = (arr, fn) => Math.min(...arr.map(fn));
+const max = (arr, fn) => Math.max(...arr.map(fn));
+const extent = (arr, fn) => [min(arr, fn), max(arr, fn)];
 
-const bisectDate = bisector(xSelector).left;
+// accessors
+const xStock = d => new Date(d.date);
+const yStock = d => d.close;
+const bisectDate = bisector(d => new Date(d.date)).left;
 
-class BitCoin extends Component {
+class BitCoin extends React.Component {
   state = {
-    data: null
+    data: []
   };
+
+  constructor(props) {
+    super(props);
+    this.handleTooltip = this.handleTooltip.bind(this);
+  }
+
   async componentDidMount() {
     const res = await fetch(
       "https://api.coindesk.com/v1/bpi/historical/close.json"
     );
     const data = await res.json();
-    // console.log('RECEIVED DATA', data)
 
     this.setState({
-      data: Object.keys(data.bpi).map(date => {
+      data: Object.keys(data.bpi).map(item => {
         return {
-          date,
-          price: data.bpi[date]
+          date: item,
+          close: data.bpi[item]
         };
       })
     });
   }
 
-  handleTooltip = ({ event, data, xSelector, xScale, yScale }) => {
+  handleTooltip({ event, data, xStock, xScale, yScale }) {
     const { showTooltip } = this.props;
     const { x } = localPoint(event);
     const x0 = xScale.invert(x);
@@ -45,57 +57,89 @@ class BitCoin extends Component {
     const d1 = data[index];
     let d = d0;
     if (d1 && d1.date) {
-      d = x0 - xSelector(d0) > xSelector(d1) - x0 ? d1 : d0;
+      d = x0 - xStock(d0.date) > xStock(d1.date) - x0 ? d1 : d0;
     }
     showTooltip({
       tooltipData: d,
-      tooltipLeft: xScale(xSelector(d)),
-      tooltipTop: yScale(ySelector(d))
+      tooltipLeft: x,
+      tooltipTop: yScale(d.close)
     });
-  };
-
+  }
   render() {
-    const { data } = this.state;
+    const width = 800;
+    const height = 500;
+    const margin = {
+      top: 60,
+      bottom: 60,
+      left: 80,
+      right: 80
+    };
+
     const {
-      showTooltip,
       hideTooltip,
       tooltipData,
       tooltipTop,
-      tooltipLeft
+      tooltipLeft,
+      events
     } = this.props;
+    if (width < 10) return null;
 
-    if (!data) return null;
+    // bounds
+    const xMax = width - margin.left - margin.right;
+    const yMax = height - margin.top - margin.bottom;
 
-    const padding = 100;
-    const xMax = width - padding;
-    const yMax = height - padding;
-
+    // scales
     const xScale = scaleTime({
-      range: [padding, xMax],
-      domain: extent(data, xSelector)
+      range: [0, xMax],
+      domain: extent(this.state.data, xStock)
     });
-
-    const dataMax = max(data, ySelector);
     const yScale = scaleLinear({
-      range: [yMax, padding],
-      domain: [0, dataMax + dataMax / 3]
+      range: [yMax, 0],
+      domain: [0, max(this.state.data, yStock) + yMax / 3],
+      nice: true
     });
 
     return (
       <div>
-        <svg width={width} height={height}>
-          {console.log("RECEIVED DATA", this.state.data)}
-          <rect x={0} y={0} width={width} height={height} fill="#32deaa" />
-          <LinePath
-            data={data}
-            xScale={xScale}
+        <svg ref={s => (this.svg = s)} width={width} height={height}>
+          {console.log("DATA IS", this.state.data)}
+          <rect
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fill="#32deaa"
+            rx={14}
+          />
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
+              <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
+            </linearGradient>
+          </defs>
+          <GridRows
+            lineStyle={{ pointerEvents: "none" }}
+            scale={yScale}
+            width={xMax}
+            strokeDasharray="2,2"
+            stroke="rgba(255,255,255,0.3)"
+          />
+          <GridColumns
+            lineStyle={{ pointerEvents: "none" }}
+            scale={xScale}
+            height={yMax}
+            strokeDasharray="2,2"
+            stroke="rgba(255,255,255,0.3)"
+          />
+          <AreaClosed
+            data={this.state.data}
+            x={d => xScale(xStock(d))}
+            y={d => yScale(yStock(d))}
             yScale={yScale}
-            x={xSelector}
-            y={ySelector}
-            strokeWidth={5}
-            stroke="#FFF"
-            strokeLinecap="round"
-            fill="transparent"
+            strokeWidth={1}
+            stroke={"url(#gradient)"}
+            fill={"url(#gradient)"}
+            curve={curveMonotoneX}
           />
           <Bar
             x={0}
@@ -103,41 +147,63 @@ class BitCoin extends Component {
             width={width}
             height={height}
             fill="transparent"
-            data={data}
-            onMouseMove={data => event =>
+            rx={14}
+            data={this.state.data}
+            onTouchStart={event =>
               this.handleTooltip({
                 event,
-                data,
-                xSelector,
+                xStock,
                 xScale,
-                yScale
-              })}
-            onMouseLeave={data => event => hideTooltip()}
-            onTouchEnd={data => event => hideTooltip()}
-            onTouchMove={data => event =>
+                yScale,
+                data: this.state.data
+              })
+            }
+            onTouchMove={event =>
               this.handleTooltip({
                 event,
-                data,
-                xSelector,
+                xStock,
                 xScale,
-                yScale
-              })}
+                yScale,
+                data: this.state.data
+              })
+            }
+            onMouseMove={event =>
+              this.handleTooltip({
+                event,
+                xStock,
+                xScale,
+                yScale,
+                data: this.state.data
+              })
+            }
+            onMouseLeave={event => hideTooltip()}
           />
           {tooltipData && (
             <g>
               <Line
                 from={{ x: tooltipLeft, y: 0 }}
                 to={{ x: tooltipLeft, y: yMax }}
-                stroke="#5C77EB"
-                strokeWidth={4}
+                stroke="rgba(92, 119, 235, 1.000)"
+                strokeWidth={2}
                 style={{ pointerEvents: "none" }}
-                strokeDasharray="4,6"
+                strokeDasharray="2,2"
+              />
+              <circle
+                cx={tooltipLeft}
+                cy={tooltipTop + 1}
+                r={4}
+                fill="black"
+                fillOpacity={0.1}
+                stroke="black"
+                strokeOpacity={0.1}
+                strokeWidth={2}
+                style={{ pointerEvents: "none" }}
               />
               <circle
                 cx={tooltipLeft}
                 cy={tooltipTop}
                 r={4}
-                fill="#5C77EB"
+                fill="rgba(92, 119, 235, 1.000)"
                 stroke="white"
                 strokeWidth={2}
                 style={{ pointerEvents: "none" }}
@@ -151,20 +217,20 @@ class BitCoin extends Component {
               top={tooltipTop - 12}
               left={tooltipLeft + 12}
               style={{
-                backgroundColor: "#5C77EB",
-                color: "#FFF"
+                backgroundColor: "rgba(92, 119, 235, 1.000)",
+                color: "white"
               }}
             >
-              {`$${ySelector(tooltipData)}`}
+              {`$${yStock(tooltipData)}`}
             </Tooltip>
             <Tooltip
-              top={yMax - 30}
+              top={yMax - 14}
               left={tooltipLeft}
               style={{
                 transform: "translateX(-50%)"
               }}
             >
-              {formatDate(xSelector(tooltipData))}
+              {formatDate(xStock(tooltipData))}
             </Tooltip>
           </div>
         )}
@@ -174,3 +240,43 @@ class BitCoin extends Component {
 }
 
 export default withTooltip(BitCoin);
+
+/* Understanding the setState mechanism - Basically I have to convert and plain object to an array of objects with 2 fields added ('date' and 'close')
+
+A> From Coindesk API - I will get the below data
+
+const data = {
+	bpi: {
+		"2019-03-26": 3945.325,
+		"2019-03-27": 4051.9033,
+		"2019-03-28": 4039.0017,
+		"2019-03-29": 4119.0183,
+		"2019-03-30": 4117.8483
+	},
+	disclaimer:
+		"This data was produced from the CoinDesk Bitcoin Price Index. BPI value data returned as USD.",
+	time: {
+		updated: "Apr 26, 2019 00:03:00 UTC",
+		updatedISO: "2019-04-26T00:03:00+00:00"
+	}
+};
+
+B> But I need the data (i.e. my state) in the below format
+
+[ { date: '2019-03-26', close: 3945.325 },
+  { date: '2019-03-27', close: 4051.9033 },
+  { date: '2019-03-28', close: 4039.0017 },
+  { date: '2019-03-29', close: 4119.0183 },
+  { date: '2019-03-30', close: 4117.8483 } ]
+
+C> Hence, first I get all the dates from the API-data with Object.keys() which will return me all the keys of the original received objects as an array
+
+this.setState({
+      data: Object.keys(data.bpi).map(item => {
+        return {
+          date: item,
+          close: data.bpi[item]
+        };
+      })
+    });
+*/

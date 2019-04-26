@@ -50,8 +50,7 @@ import OnBoardPortsIcon from "../../assets/Images/Icons/images.jpeg";
 import OptionsIcon from "../../assets/Images/Icons/options.png";
 import ComputerIcon from "../../assets/Images/Icons/artwork_2x.png";
 import TruckIcon from "../../assets/Images/Icons/fast.svg";
-
-const drawerWidth = 300;
+import AllRoutes from "../../Routes/DashboardRoutes";
 
 class SiteDesign extends React.Component {
   state = {
@@ -117,7 +116,13 @@ class SiteDesign extends React.Component {
 
   render() {
     const open = Boolean(this.state.anchorEl);
-    const { classes, theme, themeType, handleThemeTypeChange } = this.props;
+    const {
+      classes,
+      children,
+      theme,
+      themeType,
+      handleThemeTypeChange
+    } = this.props;
 
     return (
       <div className={classes.root}>
@@ -396,7 +401,12 @@ class SiteDesign extends React.Component {
               </ListItemIcon>
               <ListItemText primary="CSV Parsing" />
             </ListItem>
-            <ListItem button key="Division-3" component={Link} to="/route-3">
+            <ListItem
+              button
+              key="Bitcoin Pricing"
+              component={Link}
+              to="/bitcoin"
+            >
               <ListItemIcon>
                 <img
                   src={TransportIcon}
@@ -404,7 +414,7 @@ class SiteDesign extends React.Component {
                   alt=""
                 />
               </ListItemIcon>
-              <ListItemText primary="Division-3" />
+              <ListItemText primary="Bitcoin Pricing" />
             </ListItem>
             <ListItem button key="Division-4" component={Link} to="/route-4">
               <ListItemIcon>
@@ -518,6 +528,7 @@ class SiteDesign extends React.Component {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
+          <AllRoutes />
         </main>
       </div>
     );
