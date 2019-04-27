@@ -8,8 +8,9 @@ import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
 import { bisector } from "d3-array";
 import { timeFormat } from "d3-time-format";
-
-// const stock = appleStock.slice(800);
+import { Row, Col } from "reactstrap";
+import { styles } from "../commonStyles/ModuleItemListStyles";
+import { withStyles } from "@material-ui/core";
 
 // util
 const formatDate = timeFormat("%b %d, '%y");
@@ -66,16 +67,17 @@ class BitCoin extends React.Component {
     });
   }
   render() {
-    const width = 800;
-    const height = 500;
+    const width = 500;
+    const height = 250;
     const margin = {
       top: 60,
-      bottom: 60,
+      bottom: 20,
       left: 80,
       right: 80
     };
 
     const {
+      classes,
       hideTooltip,
       tooltipData,
       tooltipTop,
@@ -100,146 +102,151 @@ class BitCoin extends React.Component {
     });
 
     return (
-      <div>
-        <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {console.log("DATA IS", this.state.data)}
-          <rect
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="#32deaa"
-            rx={14}
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
-            </linearGradient>
-          </defs>
-          <GridRows
-            lineStyle={{ pointerEvents: "none" }}
-            scale={yScale}
-            width={xMax}
-            strokeDasharray="2,2"
-            stroke="rgba(255,255,255,0.3)"
-          />
-          <GridColumns
-            lineStyle={{ pointerEvents: "none" }}
-            scale={xScale}
-            height={yMax}
-            strokeDasharray="2,2"
-            stroke="rgba(255,255,255,0.3)"
-          />
-          <AreaClosed
-            data={this.state.data}
-            x={d => xScale(xStock(d))}
-            y={d => yScale(yStock(d))}
-            yScale={yScale}
-            strokeWidth={1}
-            stroke={"url(#gradient)"}
-            fill={"url(#gradient)"}
-            curve={curveMonotoneX}
-          />
-          <Bar
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="transparent"
-            rx={14}
-            data={this.state.data}
-            onTouchStart={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.data
-              })
-            }
-            onTouchMove={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.data
-              })
-            }
-            onMouseMove={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.data
-              })
-            }
-            onMouseLeave={event => hideTooltip()}
-          />
-          {tooltipData && (
-            <g>
-              <Line
-                from={{ x: tooltipLeft, y: 0 }}
-                to={{ x: tooltipLeft, y: yMax }}
-                stroke="rgba(92, 119, 235, 1.000)"
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
+      <div style={{ overflowX: "auto" }} className={classes.root}>
+        <Row>
+          <Col xs="12" className={classes.root}>
+            <svg ref={s => (this.svg = s)} width={width} height={height}>
+              {console.log("DATA IS", this.state.data)}
+              <rect
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                fill="#32deaa"
+                rx={14}
+              />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+              <GridRows
+                lineStyle={{ pointerEvents: "none" }}
+                scale={yScale}
+                width={xMax}
                 strokeDasharray="2,2"
+                stroke="rgba(255,255,255,0.3)"
               />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop + 1}
-                r={4}
-                fill="black"
-                fillOpacity={0.1}
-                stroke="black"
-                strokeOpacity={0.1}
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
+              <GridColumns
+                lineStyle={{ pointerEvents: "none" }}
+                scale={xScale}
+                height={yMax}
+                strokeDasharray="2,2"
+                stroke="rgba(255,255,255,0.3)"
               />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop}
-                r={4}
-                fill="rgba(92, 119, 235, 1.000)"
-                stroke="white"
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
+              <AreaClosed
+                data={this.state.data}
+                x={d => xScale(xStock(d))}
+                y={d => yScale(yStock(d))}
+                yScale={yScale}
+                strokeWidth={1}
+                stroke={"url(#gradient)"}
+                fill={"url(#gradient)"}
+                curve={curveMonotoneX}
               />
-            </g>
-          )}
-        </svg>
-        {tooltipData && (
-          <div>
-            <Tooltip
-              top={tooltipTop - 12}
-              left={tooltipLeft + 12}
-              style={{
-                backgroundColor: "rgba(92, 119, 235, 1.000)",
-                color: "white"
-              }}
-            >
-              {`$${yStock(tooltipData)}`}
-            </Tooltip>
-            <Tooltip
-              top={yMax - 14}
-              left={tooltipLeft}
-              style={{
-                transform: "translateX(-50%)"
-              }}
-            >
-              {formatDate(xStock(tooltipData))}
-            </Tooltip>
-          </div>
-        )}
+              <Bar
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                fill="transparent"
+                rx={14}
+                data={this.state.data}
+                onTouchStart={event =>
+                  this.handleTooltip({
+                    event,
+                    xStock,
+                    xScale,
+                    yScale,
+                    data: this.state.data
+                  })
+                }
+                onTouchMove={event =>
+                  this.handleTooltip({
+                    event,
+                    xStock,
+                    xScale,
+                    yScale,
+                    data: this.state.data
+                  })
+                }
+                onMouseMove={event =>
+                  this.handleTooltip({
+                    event,
+                    xStock,
+                    xScale,
+                    yScale,
+                    data: this.state.data
+                  })
+                }
+                onMouseLeave={event => hideTooltip()}
+              />
+              {tooltipData && (
+                <g>
+                  <Line
+                    from={{ x: tooltipLeft, y: 0 }}
+                    to={{ x: tooltipLeft, y: yMax }}
+                    stroke="rgba(92, 119, 235, 1.000)"
+                    strokeWidth={2}
+                    style={{ pointerEvents: "none" }}
+                    strokeDasharray="2,2"
+                  />
+                  <circle
+                    cx={tooltipLeft}
+                    cy={tooltipTop + 1}
+                    r={4}
+                    fill="black"
+                    fillOpacity={0.1}
+                    stroke="black"
+                    strokeOpacity={0.1}
+                    strokeWidth={2}
+                    style={{ pointerEvents: "none" }}
+                  />
+                  <circle
+                    cx={tooltipLeft}
+                    cy={tooltipTop}
+                    r={4}
+                    fill="rgba(92, 119, 235, 1.000)"
+                    stroke="white"
+                    strokeWidth={2}
+                    style={{ pointerEvents: "none" }}
+                  />
+                </g>
+              )}
+            </svg>
+            {tooltipData && (
+              <div>
+                <Tooltip
+                  top={tooltipTop - 12}
+                  left={tooltipLeft + 12}
+                  style={{
+                    backgroundColor: "rgba(92, 119, 235, 1.000)",
+                    color: "white"
+                  }}
+                >
+                  {`$${yStock(tooltipData)}`}
+                </Tooltip>
+                <Tooltip
+                  top={yMax - 14}
+                  left={tooltipLeft}
+                  style={{
+                    transform: "translateX(-50%)"
+                  }}
+                >
+                  {formatDate(xStock(tooltipData))}
+                </Tooltip>
+              </div>
+            )}
+          </Col>
+        </Row>
       </div>
     );
   }
 }
 
-export default withTooltip(BitCoin);
+// export default withTooltip(BitCoin);
+export default withStyles(styles)(withTooltip(BitCoin));
 
 /* Understanding the setState mechanism - Basically I have to convert and plain object to an array of objects with 2 fields added ('date' and 'close')
 

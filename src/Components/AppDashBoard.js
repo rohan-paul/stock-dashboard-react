@@ -47,9 +47,6 @@ class AppDashBoard extends Component {
             handleThemeTypeChange={this.handleThemeTypeChange}
             themeType={themeType}
           />
-          <div style={{ marginLeft: "100px", marginTop: "100px" }}>
-            <h2>Open the side bar to move to different section</h2>
-          </div>
         </React.Fragment>
       </MuiThemeProvider>
     );

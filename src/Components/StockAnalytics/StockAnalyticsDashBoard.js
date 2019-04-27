@@ -5,6 +5,7 @@ import { withStyles } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import styles from "./Styles/analyticsStyles.js";
 import axios from "axios";
+import { Row, Col } from "reactstrap";
 import Typography from "@material-ui/core/Typography";
 import SandP500_PE from "./SandP500_PE";
 
@@ -14,7 +15,10 @@ export class StockAnalyticsDashBoard extends Component {
 
     return (
       <React.Fragment>
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <div
+          style={{ display: "flex", flexDirection: "row" }}
+          className={classes.root}
+        >
           <Paper className={classes.bottomLeftPaper}>
             <Typography variant="h6" component="h6">
               Selected Stock

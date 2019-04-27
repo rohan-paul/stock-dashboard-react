@@ -72,13 +72,14 @@ module.exports = {
         duration: theme.transitions.duration.enteringScreen
       })
     },
+    /* The below for the width of the side-drawer when the drawer is completely closed */
     drawerClose: {
       transition: theme.transitions.create("width", {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen
       }),
       overflowX: "hidden",
-      width: theme.spacing.unit * 7 + 1
+      width: theme.spacing.unit * 10 + 1
     },
     toolbar: {
       display: "flex",
@@ -90,10 +91,10 @@ module.exports = {
     content: {
       flexGrow: 1,
       width: "100%",
-      padding: theme.spacing.unit * 3
+      padding: theme.spacing.unit * 2
     },
     nested: {
-      paddingLeft: theme.spacing.unit * 4
+      paddingLeft: theme.spacing.unit * 3
     },
     nestedProfile: {
       paddingLeft: theme.spacing.unit * 1
@@ -115,8 +116,18 @@ module.exports = {
       marginBottom: 0
     },
     sideNavBarIcon: {
-      height: 24,
-      width: 24
+      marginTop: "15px",
+      height: 35,
+      width: 35
+    },
+    sideNavBarIconDashboard: {
+      marginTop: "15px",
+      height: 35,
+      width: 35
+    },
+    sideNavBarIconAdmin: {
+      height: 35,
+      width: 35
     }
   })
 };

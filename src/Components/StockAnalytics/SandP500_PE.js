@@ -45,11 +45,11 @@ class SandP500_PE extends React.Component {
     });
   }
   render() {
-    const width = 800;
-    const height = 500;
+    const width = 400;
+    const height = 300;
     const margin = {
       top: 60,
-      bottom: 60,
+      bottom: 20,
       left: 80,
       right: 80
     };

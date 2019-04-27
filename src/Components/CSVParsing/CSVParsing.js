@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import Dropzone from "react-dropzone";
 import { parse } from "papaparse";
 import MUIDataTable from "mui-datatables";
+import { Row, Col } from "reactstrap";
+import { styles } from "../commonStyles/ModuleItemListStyles";
+import { withStyles } from "@material-ui/core";
 
 const dropzoneStyle = {
   width: 250,
@@ -46,12 +49,13 @@ class CSVParsing extends Component {
   };
 
   render() {
+    const { classes } = this.props;
     const { data } = this.state;
 
     const dataForTableRendering =
       data.length !== 0 ? data.map(i => Object.values(i)) : null;
 
-    console.log("PARSED DATE IS ", data);
+    // console.log("PARSED DATE IS ", data);
 
     const columns = data.length !== 0 ? data.map(i => Object.keys(i))[0] : null;
 
@@ -62,7 +66,7 @@ class CSVParsing extends Component {
 
     return (
       <React.Fragment>
-        <div style={{ marginLeft: "100px", marginTop: "100px" }}>
+        <div style={{ marginTop: "100px" }} className={classes.root}>
           <section style={dropzoneStyle}>
             <Dropzone onDrop={this.onDrop}>
               {({ getRootProps, getInputProps }) => (
@@ -91,4 +95,4 @@ class CSVParsing extends Component {
   }
 }
 
-export default CSVParsing;
+export default withStyles(styles)(CSVParsing);

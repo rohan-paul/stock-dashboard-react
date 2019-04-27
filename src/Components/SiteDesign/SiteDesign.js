@@ -38,9 +38,9 @@ import ReportsIcon from "../../assets/Images/Icons/euro-96594_1280.png";
 import UserIcon from "../../assets/Images/Icons/5G-web-design-thum-1.jpg";
 import SystemIcon from "../../assets/Images/Icons/runer-silhouette-running-fast.png";
 import UsersIcon from "../../assets/Images/Icons/custom-web-design-free-template.png";
-import ToolsIcon from "../../assets/Images/Icons/images.png";
+import ToolsIcon from "../../assets/Images/Icons/images.jpg";
 import DepartmentsIcon from "../../assets/Images/Icons/Bold-and-Vibrant-colors.png";
-import TransportIcon from "../../assets/Images/Icons/22.png";
+import TransportIcon from "../../assets/Images/Icons/bitcoin.svg";
 import ProductionIcon from "../../assets/Images/Icons/tools.png";
 import ResearchIcon from "../../assets/Images/Icons/startup-idea-innovation-business-bulb-big-thing.png";
 import EducationIcon from "../../assets/Images/Icons/education.png";
@@ -281,7 +281,7 @@ class SiteDesign extends React.Component {
               <ListItemIcon>
                 <img
                   src={DashBoardIcon}
-                  className={classes.sideNavBarIcon}
+                  className={classes.sideNavBarIconDashboard}
                   alt=""
                 />
               </ListItemIcon>
@@ -329,7 +329,11 @@ class SiteDesign extends React.Component {
 
             <ListItem button onClick={this.handleClickAdmin}>
               <ListItemIcon>
-                <img src={UserIcon} className={classes.sideNavBarIcon} alt="" />
+                <img
+                  src={UserIcon}
+                  className={classes.sideNavBarIconAdmin}
+                  alt=""
+                />
               </ListItemIcon>
               <ListItemText inset primary="Admin" />
               {this.state.openAdmin ? <ExpandLess /> : <ExpandMore />}

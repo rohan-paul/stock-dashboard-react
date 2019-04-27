@@ -34,21 +34,6 @@ var styles = theme => ({
     marginTop: "15px",
     width: "100%",
     minWidth: "400px",
-    height: "450px",
-    paddingLeft: "15px",
-    verticalAlign: "center",
-    textAlign: "center",
-    color: "white",
-    backgroundColor: "white",
-    borderRadius: "5px",
-    fontSize: 20,
-    cursor: "pointer"
-  },
-
-  bottomLeftPaperAdmin: {
-    marginTop: "15px",
-    width: "100%",
-    minWidth: "400px",
     height: "550px",
     paddingLeft: "15px",
     verticalAlign: "center",
@@ -57,28 +42,15 @@ var styles = theme => ({
     backgroundColor: "white",
     borderRadius: "5px",
     fontSize: 20,
-    cursor: "pointer"
+    cursor: "pointer",
+    marginTop: theme.spacing.unit * 6,
+    overflow: "auto"
   },
 
   bottomRightPaper: {
     marginLeft: "15px",
     marginTop: "15px",
     width: "100%",
-    height: "450px",
-    paddingLeft: "15px",
-    verticalAlign: "center",
-    textAlign: "center",
-    color: "white",
-    backgroundColor: "white",
-    borderRadius: "5px",
-    fontSize: 20,
-    cursor: "pointer"
-  },
-
-  bottomRightPaperAdmin: {
-    marginLeft: "15px",
-    marginTop: "15px",
-    width: "100%",
     height: "550px",
     paddingLeft: "15px",
     verticalAlign: "center",
@@ -87,7 +59,9 @@ var styles = theme => ({
     backgroundColor: "white",
     borderRadius: "5px",
     fontSize: 20,
-    cursor: "pointer"
+    cursor: "pointer",
+    marginTop: theme.spacing.unit * 6,
+    overflow: "auto"
   },
 
   anchorIcon: {
