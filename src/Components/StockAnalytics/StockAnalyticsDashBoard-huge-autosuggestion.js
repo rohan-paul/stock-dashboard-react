@@ -9,30 +9,29 @@ import { Row, Col } from "reactstrap";
 import Typography from "@material-ui/core/Typography";
 import SandP500_PE from "./SandP500_PE";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import SearchBar from "material-ui-search-bar-enhanced";
-// import NoSsr from "@material-ui/core/NoSsr";
-// import Select from "react-select";
-// import Control from "./Autocomplete/Control";
-// import NoOptionsMessage from "./Autocomplete/NoOptionsMessage";
-// import MultiValue from "./Autocomplete/MultiValue";
-// import ValueContainer from "./Autocomplete/ValueContainer";
-// import SingleValue from "./Autocomplete/SingleValue";
-// import Placeholder from "./Autocomplete/Placeholder";
-// import Option from "./Autocomplete/Option";
-// import Menu from "./Autocomplete/Menu";
+import NoSsr from "@material-ui/core/NoSsr";
+import Select from "react-select";
+import Control from "./Autocomplete/Control";
+import NoOptionsMessage from "./Autocomplete/NoOptionsMessage";
+import MultiValue from "./Autocomplete/MultiValue";
+import ValueContainer from "./Autocomplete/ValueContainer";
+import SingleValue from "./Autocomplete/SingleValue";
+import Placeholder from "./Autocomplete/Placeholder";
+import Option from "./Autocomplete/Option";
+import Menu from "./Autocomplete/Menu";
 
-// const { allStockSymbols } = require("../all-stock-symbols-from-iextrading");
+const { allStockSymbols } = require("../all-stock-symbols-from-iextrading");
 
-// const components = {
-//   Control,
-//   Menu,
-//   MultiValue,
-//   NoOptionsMessage,
-//   Option,
-//   Placeholder,
-//   SingleValue,
-//   ValueContainer
-// };
+const components = {
+  Control,
+  Menu,
+  MultiValue,
+  NoOptionsMessage,
+  Option,
+  Placeholder,
+  SingleValue,
+  ValueContainer
+};
 
 export class StockAnalyticsDashBoard extends Component {
   state = {
@@ -40,12 +39,12 @@ export class StockAnalyticsDashBoard extends Component {
   };
 
   // Handling Autocompletion field value change
-  //   handleAutocompletionChange = name => value => {
-  //     this.setState({
-  //       [name]: value,
-  //       stockTicker: value.label
-  //     });
-  //   };
+  handleAutocompletionChange = name => value => {
+    this.setState({
+      [name]: value,
+      stockTicker: value.label
+    });
+  };
 
   render() {
     const { classes, theme } = this.props;
@@ -63,15 +62,22 @@ export class StockAnalyticsDashBoard extends Component {
     return (
       <MuiThemeProvider>
         <React.Fragment>
-          {console.log("TICKER IS", this.state.stockTicker)}
-          <SearchBar
-            onChange={value => this.setState({ stockTicker: value })}
-            onRequestSearch={() => console.log("onRequestSearch")}
-            style={{
-              margin: "70px auto 0",
-              maxWidth: 800
-            }}
-          />
+          <div style={{ marginTop: "50px" }}>
+            <NoSsr>
+              <Select
+                id="outlined-full-width"
+                variant="outlined"
+                classes={classes}
+                styles={selectStyles}
+                options={allStockSymbols}
+                components={components}
+                value={this.state.stockTicker}
+                onChange={this.handleAutocompletionChange("single")}
+                placeholder="Search Products (start typing)"
+                isClearable
+              />
+            </NoSsr>
+          </div>
           <div
             style={{ display: "flex", flexDirection: "row" }}
             className={classes.root}

@@ -81,7 +81,7 @@ class SandP500_PE extends React.Component {
     return (
       <div>
         <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {console.log("DATA IS", stock)}
+          {/*{console.log("DATA IS", stock)}*/}
           <rect
             x={0}
             y={0}

@@ -33,21 +33,21 @@ class BitCoin extends React.Component {
     this.handleTooltip = this.handleTooltip.bind(this);
   }
 
-  async componentDidMount() {
-    const res = await fetch(
-      "https://api.coindesk.com/v1/bpi/historical/close.json"
-    );
-    const data = await res.json();
+  //   async componentDidMount() {
+  //     const res = await fetch(
+  //       "https://api.coindesk.com/v1/bpi/historical/close.json"
+  //     );
+  //     const data = await res.json();
 
-    this.setState({
-      data: Object.keys(data.bpi).map(item => {
-        return {
-          date: item,
-          close: data.bpi[item]
-        };
-      })
-    });
-  }
+  //     this.setState({
+  //       data: Object.keys(data.bpi).map(item => {
+  //         return {
+  //           date: item,
+  //           close: data.bpi[item]
+  //         };
+  //       })
+  //     });
+  //   }
 
   handleTooltip({ event, data, xStock, xScale, yScale }) {
     const { showTooltip } = this.props;
@@ -106,7 +106,7 @@ class BitCoin extends React.Component {
         <Row>
           <Col xs="12" className={classes.root}>
             <svg ref={s => (this.svg = s)} width={width} height={height}>
-              {console.log("DATA IS", this.state.data)}
+              {/*{console.log("DATA IS", this.state.data)}*/}
               <rect
                 x={0}
                 y={0}

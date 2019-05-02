@@ -43,7 +43,6 @@ var styles = theme => ({
     borderRadius: "5px",
     fontSize: 20,
     cursor: "pointer",
-    marginTop: theme.spacing.unit * 6,
     overflow: "auto"
   },
 
@@ -60,7 +59,6 @@ var styles = theme => ({
     borderRadius: "5px",
     fontSize: 20,
     cursor: "pointer",
-    marginTop: theme.spacing.unit * 6,
     overflow: "auto"
   },
 
