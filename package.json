@@ -61,6 +61,7 @@
         "react-scripts": "^2.1.8",
         "react-select": "^2.4.3",
         "react-table": "^6.10.0",
+        "react-window": "^1.8.1",
         "reactstrap": "^8.0.0",
         "sinon": "^7.2.4",
         "styled-components": "^4.1.3"

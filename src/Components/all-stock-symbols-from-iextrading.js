@@ -35652,5 +35652,8 @@ module.exports = {
       value: "QTUMUSDT",
       label: "Qtum USD"
     }
-  ]
+  ].map(item => ({
+    value: item.value,
+    label: `${item.value} ${item.label}`
+  }))
 };

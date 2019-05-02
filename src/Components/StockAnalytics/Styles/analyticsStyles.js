@@ -89,6 +89,22 @@ var styles = theme => ({
   divider: {
     height: theme.spacing.unit * 2
   }
+
+  /* styles for the Autocompletion while searching for stock ticker */
+  /*  List: {
+    border: 1px solid #d9dddd;
+  },
+  
+  
+  ListItemOdd : {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  ListItemEven: {
+    background-color: #f8f8f0;
+  } */
 });
 
 export default styles;
