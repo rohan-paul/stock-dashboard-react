@@ -2,7 +2,6 @@
 
 #### Some notes on using [www.quandl.com/api](www.quandl.com/api)
 
-
 1> The main official doc is at -
 
 [https://docs.quandl.com/docs/in-depth-usage](https://docs.quandl.com/docs/in-depth-usage)

@@ -18,6 +18,7 @@ import Icon from "@material-ui/core/Icon";
 
 const height = 35;
 
+// I had to resort to this special way of rendering react-select for handling 30,000 rows of data in the autosuggestion
 class MenuList extends Component {
   render() {
     const { options, children, maxHeight, getValue } = this.props;
@@ -38,19 +39,40 @@ class MenuList extends Component {
   }
 }
 
+// Function to convert the date format that I received from "material-ui-pickers" package to the YYYY-MM-DD required by the Quandl API
+const convertDateFromStringToAPIFormat = str => {
+  const date = new Date(str);
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const day = ("0" + date.getDate()).slice(-2);
+  return [date.getFullYear(), month, day].join("-");
+};
+
 export class StockAnalyticsDashBoard extends Component {
   state = {
     stockTicker: "",
+    stockTickerAndLabel: "",
     symbolList: [],
-    fromDate: new Date(),
-    toDate: new Date()
+    fromDate: "",
+    toDate: "",
+    xAxisData: [],
+    yAxisData: []
   };
 
-  // HO function to handle Autocompletion field value change
+  // Higher order function to handle Autocompletion field value change
   handleAutocompletionChange = name => value => {
-    this.setState({
-      stockTicker: value.value
-    });
+    this.setState(
+      {
+        stockTicker: value.value
+      },
+      () => {
+        const stockTickerWithName = this.state.symbolList.filter(i => {
+          return i.value === this.state.stockTicker;
+        })[0].label;
+        this.setState({
+          stockTickerAndLabel: stockTickerWithName
+        });
+      }
+    );
   };
 
   componentDidMount() {
@@ -65,6 +87,48 @@ export class StockAnalyticsDashBoard extends Component {
         });
       });
   }
+
+  handleSubmitToFetchAPI = () => {
+    // if (e) e.preventDefault();
+    const { stockTicker, fromDate, toDate } = this.state;
+    const APIkey = "xVgPxg_akYvyDdHhqEox";
+
+    if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
+      const url = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+
+      axios
+        .get(url)
+        .then(res => {
+          if (res.data.dataset.data.length !== 0) {
+            const receivedStockClosingData = res.data.dataset.data;
+            const closingPriceDate = receivedStockClosingData.map(i => i[0]);
+            const closingPrice = receivedStockClosingData.map(i => i[1]);
+            console.log("RECEIVED DATA ", receivedStockClosingData);
+            this.setState({
+              xAxisData: closingPriceDate,
+              yAxisData: closingPrice
+            });
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    }
+  };
+
+  handleFromDateChange = date => {
+    const fromDateFormatted = convertDateFromStringToAPIFormat(date);
+    this.setState({
+      fromDate: fromDateFormatted
+    });
+  };
+
+  handleToDateChange = date => {
+    const toDateFormatted = convertDateFromStringToAPIFormat(date);
+    this.setState({
+      toDate: toDateFormatted
+    });
+  };
 
   render() {
     const { classes, theme } = this.props;
@@ -85,9 +149,6 @@ export class StockAnalyticsDashBoard extends Component {
     return (
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <React.Fragment>
-          {console.log("SYMBOLS IS", this.state.stockTicker)}
-          {console.log("START DATE IS", this.state.fromDate)}
-          {console.log("TO DATE IS", this.state.toDate)}
           <Paper className={classes.topSearchBarPaper}>
             <div className={classes.reactSelectAndDatePicker}>
               <div>
@@ -126,11 +187,7 @@ export class StockAnalyticsDashBoard extends Component {
                   disableOpenOnEnter
                   animateYearScrolling={false}
                   value={this.state.fromDate}
-                  onChange={value => {
-                    this.setState({
-                      fromDate: value
-                    });
-                  }}
+                  onChange={this.handleFromDateChange}
                 />
                 <DatePicker
                   className={classes.individualDatePicker}
@@ -156,16 +213,14 @@ export class StockAnalyticsDashBoard extends Component {
                   disableOpenOnEnter
                   animateYearScrolling={false}
                   value={this.state.toDate}
-                  onChange={value => {
-                    this.setState({
-                      toDate: value
-                    });
-                  }}
+                  onChange={this.handleToDateChange}
                 />
                 <Button
                   variant="contained"
                   color="primary"
                   className={classes.button}
+                  onClick={this.handleSubmitToFetchAPI}
+                  type="submit"
                 >
                   Get data
                   {/* This Button uses a Font Icon, see the installation instructions in the docs. */}
@@ -181,7 +236,7 @@ export class StockAnalyticsDashBoard extends Component {
           >
             <Paper className={classes.bottomLeftPaper}>
               <Typography variant="h6" component="h6">
-                Selected Stock {this.state.stockTicker}
+                Selected Stock {this.state.stockTickerAndLabel}
               </Typography>
             </Paper>
 
@@ -204,6 +259,26 @@ StockAnalyticsDashBoard.propTypes = {
 
 export default withStyles(styles, { withTheme: true })(StockAnalyticsDashBoard);
 
+/* 1> Explanation on the two function getXAxis and getYAxis
+
+Received data from API will be as below
+"data": [
+            ["2018-02-23", 183.29],
+            ["2018-02-22", 178.99], ]
+
+But for the line-graph I need
+
+var config = {
+  xAxis: {
+    categories: ["2018-02-23", '2018-02-22']
+  },
+  series: [{
+    data: [29.9, 71.5 ]
+  }]
+};
+
+*/
+
 /*
   componentDidMount() {
     axios
@@ -216,46 +291,10 @@ export default withStyles(styles, { withTheme: true })(StockAnalyticsDashBoard);
         });
       });
   }
-==================================
 
-   <SearchBar
-            onChange={value => this.setState({ stockTicker: value })}
-            onRequestSearch={() => console.log("onRequestSearch")}
-            style={{
-              margin: "70px auto 0",
-              maxWidth: 800
-            }}
-          />
-==================================
-  // ALTERNATIVE (ORIGINAL FROM react-select original) HO function to handle Autocompletion field value change
-  handleAutocompletionChange = name => value => {
-    this.setState({
-      [name]: value,
-      stockTicker: value.value
-    });
-  };
-
-  =====================
-  <DatePicker
-              keyboard
-              margin="normal"
-              classes={{
-                root: classes.space
-              }}
-              format="dd/MM/yyyy"
-              mask={value =>
-                value
-                  ? [/\d/, /\d/, "/", /\d/, /\d/, "/", /\d/, /\d/, /\d/, /\d/]
-                  : []
-              }
-              label="Start Date (of Import)"
-              disableOpenOnEnter
-              animateYearScrolling={false}
-              value={this.state.fromDate}
-              onChange={value => {
-                this.setState({
-                  fromDate: value
-                });
-              }}
-            />
+  ////////////////////////////
+  {console.log("SYMBOLS IS", this.state.tickerSelectedByUser)}
+          {console.log("START DATE IS", this.state.fromDate)}
+          {console.log("TO DATE IS", this.state.toDate)}
+          {console.log("X AXIS DATA ", this.state.xAxisData)}
 */

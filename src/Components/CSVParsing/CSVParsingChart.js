@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 // const ReactHighstock = require("react-highcharts/ReactHighstock.src");
 const ReactHighstock = require("react-highcharts");
-const Highlight = require("react-highlight");
 
 export class CSVParsingChart extends Component {
   render() {
@@ -38,8 +37,8 @@ export class CSVParsingChart extends Component {
     };
     return (
       <div>
-        {console.log("X AXIS", this.props.formattedXAxisDataForChartLine)}
-        {console.log("Y AXIS", this.props.formattedYAxisDataForChartLine)}
+        {/*{console.log("X AXIS", this.props.formattedXAxisDataForChartLine)}
+        {console.log("Y AXIS", this.props.formattedYAxisDataForChartLine)}*/}
         <ReactHighstock config={config} />
         );
       </div>
