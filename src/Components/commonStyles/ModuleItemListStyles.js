@@ -1,7 +1,7 @@
 export const styles = theme => ({
   palette: {
     primary: { main: "#2196f3" },
-    secondary: { main: "#fdff00" },
+    secondary: { main: "#0023ff" },
     error: { main: "#ee0053" }
   },
   root: {

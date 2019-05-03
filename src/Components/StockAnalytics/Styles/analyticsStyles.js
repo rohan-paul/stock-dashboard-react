@@ -61,6 +61,39 @@ var styles = theme => ({
     cursor: "pointer",
     overflow: "auto"
   },
+  topSearchBarPaper: {
+    display: "flex",
+    flexDirection: "row",
+    margin: "70px auto 0",
+    maxWidth: "100%",
+    height: "75px"
+  },
+  reactSelectAndDatePicker: {
+    display: "flex",
+    flexDirection: "row",
+    margin: "auto"
+  },
+
+  bothDatePicker: {
+    display: "flex",
+    flexDirection: "row",
+    marginLeft: "10px",
+    marginTop: 0
+  },
+
+  individualDatePicker: {
+    marginLeft: "10px",
+    width: "30%",
+    marginTop: 0
+  },
+
+  button: {
+    marginLeft: "15px"
+  },
+
+  rightIcon: {
+    marginLeft: theme.spacing.unit
+  },
 
   anchorIcon: {
     paddingRight: "15px",
@@ -94,14 +127,14 @@ var styles = theme => ({
   /*  List: {
     border: 1px solid #d9dddd;
   },
-  
-  
+
+
   ListItemOdd : {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
+
   ListItemEven: {
     background-color: #f8f8f0;
   } */
