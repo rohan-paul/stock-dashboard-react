@@ -14,6 +14,7 @@ import { MuiPickersUtilsProvider, DatePicker } from "material-ui-pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import Button from "@material-ui/core/Button";
 import Icon from "@material-ui/core/Icon";
+import StockLineChart from "./StockLineChart";
 // const moment = require("moment");
 
 const height = 35;
@@ -89,7 +90,6 @@ export class StockAnalyticsDashBoard extends Component {
   }
 
   handleSubmitToFetchAPI = () => {
-    // if (e) e.preventDefault();
     const { stockTicker, fromDate, toDate } = this.state;
     const APIkey = "xVgPxg_akYvyDdHhqEox";
 
@@ -237,6 +237,10 @@ export class StockAnalyticsDashBoard extends Component {
             <Paper className={classes.bottomLeftPaper}>
               <Typography variant="h6" component="h6">
                 Selected Stock {this.state.stockTickerAndLabel}
+                <StockLineChart
+                  xAxisData={this.state.xAxisData}
+                  yAxisData={this.state.yAxisData}
+                />
               </Typography>
             </Paper>
 
