@@ -91,7 +91,7 @@ export class StockAnalyticsDashBoard extends Component {
 
   handleSubmitToFetchAPI = () => {
     const { stockTicker, fromDate, toDate } = this.state;
-    const APIkey = "xVgPxg_akYvyDdHhqEox";
+    const APIkey = process.env.REACT_APP_QUANDL_API_KEY;
 
     if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
       const url = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
@@ -248,7 +248,12 @@ export class StockAnalyticsDashBoard extends Component {
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
                 S&P 500 P/E ratio during same time
-                <SandP500_PE />
+                {this.state.fromDate !== "" && this.state.toDate !== "" ? (
+                  <SandP500_PE
+                    fromDate={this.state.fromDate}
+                    toDate={this.state.toDate}
+                  />
+                ) : null}
               </Typography>
             </Paper>
           </div>
@@ -285,17 +290,6 @@ var config = {
 */
 
 /*
-  componentDidMount() {
-    axios
-      .get(
-        "https://www.quandl.com/api/v3/datasets/MULTPL/SP500_PE_RATIO_MONTH.json?api_key=xVgPxg_akYvyDdHhqEox"
-      )
-      .then(res => {
-        this.setState({
-          s_and_p_500_pe_ratio: res.data.dataset.data
-        });
-      });
-  }
 
   ////////////////////////////
   {console.log("SYMBOLS IS", this.state.tickerSelectedByUser)}

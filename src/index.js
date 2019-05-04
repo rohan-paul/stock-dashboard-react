@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import App from "./App";
 import "react-table/react-table.css";
+require("dotenv").config();
 
 const Dashboard = () => {
   return <App />;

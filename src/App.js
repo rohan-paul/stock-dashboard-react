@@ -16,6 +16,7 @@ import {
   faUser
 } from "@fortawesome/free-solid-svg-icons";
 library.add(faFilter, faDownload, faCalendarAlt, faShip, faAnchor, faUser);
+require("dotenv").config();
 
 class App extends Component {
   render() {

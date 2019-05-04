@@ -1,6 +1,5 @@
 import React from "react";
 import { AreaClosed, Line, Bar } from "@vx/shape";
-import { appleStock } from "@vx/mock-data";
 import { curveMonotoneX } from "@vx/curve";
 import { GridRows, GridColumns } from "@vx/grid";
 import { scaleTime, scaleLinear } from "@vx/scale";
@@ -8,8 +7,7 @@ import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
 import { bisector } from "d3-array";
 import { timeFormat } from "d3-time-format";
-
-const stock = appleStock.slice(800);
+import axios from "axios";
 
 // util
 const formatDate = timeFormat("%b %d, '%y");
@@ -22,11 +20,57 @@ const xStock = d => new Date(d.date);
 const yStock = d => d.close;
 const bisectDate = bisector(d => new Date(d.date)).left;
 
+const getDateAndClosingPrice = obj => {
+  let result = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      result.push([key, obj[key].close]);
+    }
+  }
+  return result.map(i => ({
+    date: i[0],
+    close: i[1]
+  }));
+};
+
 class SandP500_PE extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      s_and_p_500_index: []
+    };
     this.handleTooltip = this.handleTooltip.bind(this);
   }
+
+  // VERY IMPORTANT - THE BELOW 'WORLDTRADINGDATA' WILL ONLY GIVE ME 250 FREE API CALLS PER DAY, AND IN THE BELOW GRAPH WHEN I MOVE MY MOUSE OVER, IT TRIGGERS THE API CALL WITH EACH MOVE OF MOUSE OVER THE DATE.
+  // AND I THINK handleToolTip() functions is the reason behind this.
+  componentDidMount() {
+    const { fromDate, toDate } = this.props;
+    const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
+
+    const url = `https://www.worldtradingdata.com/api/v1/history?symbol=^INX&date_from=${fromDate}&date_to=${toDate}&sort=newest&api_token=${APIkey}`;
+
+    if (fromDate !== "" && toDate !== "") {
+      axios
+        .get(url)
+        .then(res => {
+          if (
+            res.data &&
+            res.data.history &&
+            Object.entries(res.data.history).length !== 0
+          ) {
+            const formattedDataFromAPI_response = getDateAndClosingPrice(
+              res.data.history
+            );
+            this.setState({
+              s_and_p_500_index: formattedDataFromAPI_response.reverse()
+            });
+          }
+        })
+        .catch(err => console.log("Error while fetching data ", err));
+    }
+  }
+
   handleTooltip({ event, data, xStock, xScale, yScale }) {
     const { showTooltip } = this.props;
     const { x } = localPoint(event);
@@ -45,13 +89,13 @@ class SandP500_PE extends React.Component {
     });
   }
   render() {
-    const width = 400;
-    const height = 300;
+    const width = 500;
+    const height = 200;
     const margin = {
-      top: 60,
-      bottom: 20,
-      left: 80,
-      right: 80
+      top: 2,
+      bottom: 2,
+      left: 2,
+      right: 2
     };
 
     const {
@@ -70,18 +114,19 @@ class SandP500_PE extends React.Component {
     // scales
     const xScale = scaleTime({
       range: [0, xMax],
-      domain: extent(stock, xStock)
+      domain: extent(this.state.s_and_p_500_index, xStock)
     });
     const yScale = scaleLinear({
       range: [yMax, 0],
-      domain: [0, max(stock, yStock) + yMax / 3],
+      domain: [0, max(this.state.s_and_p_500_index, yStock) + yMax / 3],
       nice: true
     });
 
     return (
       <div>
         <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {/*{console.log("DATA IS", stock)}*/}
+          {console.log("STOCK IS", this.state.s_and_p_500_index)}
+          {console.log("FROM DATE", this.props.fromDate)}
           <rect
             x={0}
             y={0}
@@ -111,7 +156,7 @@ class SandP500_PE extends React.Component {
             stroke="rgba(255,255,255,0.3)"
           />
           <AreaClosed
-            data={stock}
+            data={this.state.s_and_p_500_index}
             x={d => xScale(xStock(d))}
             y={d => yScale(yStock(d))}
             yScale={yScale}
@@ -127,14 +172,14 @@ class SandP500_PE extends React.Component {
             height={height}
             fill="transparent"
             rx={14}
-            data={stock}
+            data={this.state.s_and_p_500_index}
             onTouchStart={event =>
               this.handleTooltip({
                 event,
                 xStock,
                 xScale,
                 yScale,
-                data: stock
+                data: this.state.s_and_p_500_index
               })
             }
             onTouchMove={event =>
@@ -143,7 +188,7 @@ class SandP500_PE extends React.Component {
                 xStock,
                 xScale,
                 yScale,
-                data: stock
+                data: this.state.s_and_p_500_index
               })
             }
             onMouseMove={event =>
@@ -152,7 +197,7 @@ class SandP500_PE extends React.Component {
                 xStock,
                 xScale,
                 yScale,
-                data: stock
+                data: this.state.s_and_p_500_index
               })
             }
             onMouseLeave={event => hideTooltip()}
@@ -219,3 +264,32 @@ class SandP500_PE extends React.Component {
 }
 
 export default withTooltip(SandP500_PE);
+
+/* Explanation of the getDateAndClosingPrice function above after getting the response from the API data ********
+
+Original data received from API
+
+const data = {
+	"2019-03-29": {
+		open: "2828.27",
+		close: "2834.40",
+		high: "2836.03",
+		low: "2819.23",
+		volume: "0"
+	},
+	"2019-03-28": {
+		open: "2809.40",
+		close: "2815.44",
+		high: "2819.71",
+		low: "2798.77",
+		volume: "0"
+	}
+};
+
+BUT I need data in following format
+
+[ { date: '2019-03-29', close: '2834.40' },
+  { date: '2019-03-28', close: '2815.44' } ]
+
+
+ */

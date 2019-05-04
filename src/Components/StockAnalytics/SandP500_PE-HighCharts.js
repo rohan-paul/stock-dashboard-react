@@ -1,80 +1,93 @@
 import React, { Component } from "react";
-import Highcharts from "highcharts";
 import axios from "axios";
-import {
-  HighchartsChart,
-  Chart,
-  withHighcharts,
-  XAxis,
-  YAxis,
-  Title,
-  Subtitle,
-  Legend,
-  LineSeries
-} from "react-jsx-highcharts";
-const _ = require("lodash");
+const ReactHighstock = require("react-highcharts");
 
-const plotOptions = {
-  series: {
-    pointStart: 2010
+// Function to re-structure the data received from the API
+const getDateAndClosingPrice = obj => {
+  let xAxis = [];
+  let yAxis = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      xAxis.push(key);
+      yAxis.push(parseInt(obj[key].close));
+    }
   }
+  return [xAxis, yAxis];
 };
-
-// var FirstDay = new Date(2018, 0, 1);
-// var LastDay = new Date(2018, 12 + 1, 0);
 
 export class SandP500_PE extends Component {
   state = {
-    s_and_p_500_pe_ratio: []
+    s_and_p_500_index: [],
+    closingDate: ""
   };
 
   componentDidMount() {
-    axios
-      .get(
-        "https://www.quandl.com/api/v3/datasets/MULTPL/SP500_PE_RATIO_MONTH.json?api_key=xVgPxg_akYvyDdHhqEox"
-      )
-      .then(res => {
-        this.setState({
-          s_and_p_500_pe_ratio: res.data.dataset.data
-        });
-      });
+    const { fromDate, toDate } = this.props;
+    const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
+
+    const url = `https://www.worldtradingdata.com/api/v1/history?symbol=^INX&date_from=${fromDate}&date_to=${toDate}&sort=newest&api_token=${APIkey}`;
+
+    if (fromDate !== "" && toDate !== "") {
+      axios
+        .get(url)
+        .then(res => {
+          if (
+            res.data &&
+            res.data.history &&
+            Object.entries(res.data.history).length !== 0
+          ) {
+            this.setState({
+              closingDate: getDateAndClosingPrice(res.data.history)[0],
+              s_and_p_500_index: getDateAndClosingPrice(res.data.history)[1]
+            });
+          }
+        })
+        .catch(err => console.log("Error while fetching data ", err));
+    }
   }
   render() {
-    const { s_and_p_500_pe_ratio } = this.state;
+    const { s_and_p_500_index, closingDate } = this.state;
 
-    const givenData1 = _.flatten(
-      s_and_p_500_pe_ratio.map(i => {
-        return i.slice(1, 2);
-      })
-    );
+    const config = {
+      chart: {
+        backgroundColor: {
+          linearGradient: [0, 0, 500, 500],
+          stops: [[0, "rgb(255, 255, 255)"], [1, "rgb(247, 247, 152)"]]
+        },
+        polar: true,
+        type: "line"
+      },
+      xAxis: {
+        categories: closingDate,
 
+        labels: {
+          align: "right",
+          rotation: "-45"
+        }
+      },
+      series: [
+        {
+          name: `S&P`,
+          data: s_and_p_500_index,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }
+      ],
+
+      title: {
+        text: `S&P 500 closing from worldtradingdata.com`
+      }
+    };
     return (
-      <div className="app">
-        {/* {console.log("FIRST DAY", FirstDay)}
-        {console.log("LAST DAY", LastDay)}*/}
-        <HighchartsChart plotOptions={plotOptions}>
-          <Chart />
-
-          <Title>S&P 500 P/E ratio during same time</Title>
-
-          <Subtitle>Source: www.quandl.com.com</Subtitle>
-
-          <Legend layout="vertical" align="right" verticalAlign="middle" />
-
-          <XAxis>
-            <XAxis.Title>Time</XAxis.Title>
-          </XAxis>
-
-          <YAxis>
-            <YAxis.Title>P/E Ratio</YAxis.Title>
-            <LineSeries name="Installation" data={givenData1} />
-          </YAxis>
-        </HighchartsChart>
+      <div>
+        {console.log("X DATA", closingDate)}
+        {console.log("Y DATA", s_and_p_500_index)}
+        <ReactHighstock config={config} />
+        );
       </div>
     );
   }
 }
 
-// export default SandP500_PE;
-
-export default withHighcharts(SandP500_PE, Highcharts);
+export default SandP500_PE;

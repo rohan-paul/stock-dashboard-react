@@ -1,244 +1,93 @@
-import React from "react";
-import { AreaClosed, Line, Bar } from "@vx/shape";
-import { appleStock } from "@vx/mock-data";
-import { curveMonotoneX } from "@vx/curve";
-import { GridRows, GridColumns } from "@vx/grid";
-import { scaleTime, scaleLinear } from "@vx/scale";
-import { withTooltip, Tooltip } from "@vx/tooltip";
-import { localPoint } from "@vx/event";
-import { bisector } from "d3-array";
-import { timeFormat } from "d3-time-format";
+import React, { Component } from "react";
 import axios from "axios";
-// const this.state.s_and_p_500_pe_ratio = appleStock.slice(800);
+const ReactHighstock = require("react-highcharts");
 
-// util
-const formatDate = timeFormat("%b %d, '%y");
-const min = (arr, fn) => Math.min(...arr.map(fn));
-const max = (arr, fn) => Math.max(...arr.map(fn));
-const extent = (arr, fn) => [min(arr, fn), max(arr, fn)];
-
-// accessors
-const xStock = d => new Date(d.date);
-const yStock = d => d.close;
-const bisectDate = bisector(d => new Date(d.date)).left;
-
-class SandP500_PE extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      s_and_p_500_pe_ratio: []
-    };
-
-    this.handleTooltip = this.handleTooltip.bind(this);
+// Function to re-structure the data received from the API
+const getDateAndClosingPrice = obj => {
+  let xAxis = [];
+  let yAxis = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      xAxis.push(key);
+      yAxis.push(parseInt(obj[key].close));
+    }
   }
+  return [xAxis, yAxis];
+};
+
+export class SandP500_PE extends Component {
+  state = {
+    s_and_p_500_index: [],
+    closingDate: ""
+  };
 
   componentDidMount() {
-    axios
-      .get(
-        "https://www.quandl.com/api/v3/datasets/MULTPL/SP500_PE_RATIO_MONTH.json?api_key=xVgPxg_akYvyDdHhqEox"
-      )
-      .then(res => {
-        this.setState({
-          s_and_p_500_pe_ratio: res.data.dataset.data
-            .map(i => ({
-              date: i[0],
-              close: i[1]
-            }))
-            .reverse()
-        });
-      });
-  }
+    const { fromDate, toDate } = this.props;
+    const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
 
-  handleTooltip({ event, data, xStock, xScale, yScale }) {
-    const { showTooltip } = this.props;
-    const { x } = localPoint(event);
-    const x0 = xScale.invert(x);
-    const index = bisectDate(data, x0, 1);
-    const d0 = data[index - 1];
-    const d1 = data[index];
-    let d = d0;
-    if (d1 && d1.date) {
-      d = x0 - xStock(d0.date) > xStock(d1.date) - x0 ? d1 : d0;
+    const url = `https://www.worldtradingdata.com/api/v1/history?symbol=^INX&date_from=${fromDate}&date_to=${toDate}&sort=newest&api_token=${APIkey}`;
+
+    if (fromDate !== "" && toDate !== "") {
+      axios
+        .get(url)
+        .then(res => {
+          if (
+            res.data &&
+            res.data.history &&
+            Object.entries(res.data.history).length !== 0
+          ) {
+            this.setState({
+              closingDate: getDateAndClosingPrice(res.data.history)[0],
+              s_and_p_500_index: getDateAndClosingPrice(res.data.history)[1]
+            });
+          }
+        })
+        .catch(err => console.log("Error while fetching data ", err));
     }
-    showTooltip({
-      tooltipData: d,
-      tooltipLeft: x,
-      tooltipTop: yScale(d.close)
-    });
   }
   render() {
-    const width = 400;
-    const height = 300;
-    const margin = {
-      top: 60,
-      bottom: 20,
-      left: 80,
-      right: 80
+    const { s_and_p_500_index, closingDate } = this.state;
+
+    const config = {
+      chart: {
+        backgroundColor: {
+          linearGradient: [0, 0, 500, 500],
+          stops: [[0, "rgb(255, 255, 255)"], [1, "rgb(247, 247, 152)"]]
+        },
+        polar: true,
+        type: "line"
+      },
+      xAxis: {
+        categories: closingDate,
+
+        labels: {
+          align: "right",
+          rotation: "-45"
+        }
+      },
+      series: [
+        {
+          name: `S&P`,
+          data: s_and_p_500_index,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }
+      ],
+
+      title: {
+        text: `S&P 500 closing from worldtradingdata.com`
+      }
     };
-
-    const {
-      hideTooltip,
-      tooltipData,
-      tooltipTop,
-      tooltipLeft,
-      events
-    } = this.props;
-    if (width < 10) return null;
-
-    // bounds
-    const xMax = width - margin.left - margin.right;
-    const yMax = height - margin.top - margin.bottom;
-
-    // scales
-    const xScale = scaleTime({
-      range: [0, xMax],
-      domain: extent(this.state.s_and_p_500_pe_ratio, xStock)
-    });
-    const yScale = scaleLinear({
-      range: [yMax, 0],
-      domain: [0, max(this.state.s_and_p_500_pe_ratio, yStock) + yMax / 3],
-      nice: true
-    });
-
     return (
       <div>
-        <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {console.log("STOCK IS", this.state.s_and_p_500_pe_ratio)}
-          {console.log("FORMATTED STOCK IS", this.state.s_and_p_500_pe_ratio)}
-          <rect
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="#32deaa"
-            rx={14}
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
-            </linearGradient>
-          </defs>
-          <GridRows
-            lineStyle={{ pointerEvents: "none" }}
-            scale={yScale}
-            width={xMax}
-            strokeDasharray="2,2"
-            stroke="rgba(255,255,255,0.3)"
-          />
-          <GridColumns
-            lineStyle={{ pointerEvents: "none" }}
-            scale={xScale}
-            height={yMax}
-            strokeDasharray="2,2"
-            stroke="rgba(255,255,255,0.3)"
-          />
-          <AreaClosed
-            data={this.state.s_and_p_500_pe_ratio}
-            x={d => xScale(xStock(d))}
-            y={d => yScale(yStock(d))}
-            yScale={yScale}
-            strokeWidth={1}
-            stroke={"url(#gradient)"}
-            fill={"url(#gradient)"}
-            curve={curveMonotoneX}
-          />
-          <Bar
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="transparent"
-            rx={14}
-            data={this.state.s_and_p_500_pe_ratio}
-            onTouchStart={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.s_and_p_500_pe_ratio
-              })
-            }
-            onTouchMove={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.s_and_p_500_pe_ratio
-              })
-            }
-            onMouseMove={event =>
-              this.handleTooltip({
-                event,
-                xStock,
-                xScale,
-                yScale,
-                data: this.state.s_and_p_500_pe_ratio
-              })
-            }
-            onMouseLeave={event => hideTooltip()}
-          />
-          {tooltipData && (
-            <g>
-              <Line
-                from={{ x: tooltipLeft, y: 0 }}
-                to={{ x: tooltipLeft, y: yMax }}
-                stroke="rgba(92, 119, 235, 1.000)"
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
-                strokeDasharray="2,2"
-              />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop + 1}
-                r={4}
-                fill="black"
-                fillOpacity={0.1}
-                stroke="black"
-                strokeOpacity={0.1}
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
-              />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop}
-                r={4}
-                fill="rgba(92, 119, 235, 1.000)"
-                stroke="white"
-                strokeWidth={2}
-                style={{ pointerEvents: "none" }}
-              />
-            </g>
-          )}
-        </svg>
-        {tooltipData && (
-          <div>
-            <Tooltip
-              top={tooltipTop - 12}
-              left={tooltipLeft + 12}
-              style={{
-                backgroundColor: "rgba(92, 119, 235, 1.000)",
-                color: "white"
-              }}
-            >
-              {`$${yStock(tooltipData)}`}
-            </Tooltip>
-            <Tooltip
-              top={yMax - 14}
-              left={tooltipLeft}
-              style={{
-                transform: "translateX(-50%)"
-              }}
-            >
-              {formatDate(xStock(tooltipData))}
-            </Tooltip>
-          </div>
-        )}
+        {console.log("X DATA", closingDate)}
+        {console.log("Y DATA", s_and_p_500_index)}
+        <ReactHighstock config={config} />
+        );
       </div>
     );
   }
 }
 
-export default withTooltip(SandP500_PE);
+export default SandP500_PE;
