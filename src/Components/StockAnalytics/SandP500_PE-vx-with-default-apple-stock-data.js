@@ -8,8 +8,8 @@ import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
 import { bisector } from "d3-array";
 import { timeFormat } from "d3-time-format";
-import axios from "axios";
-// const this.state.s_and_p_500_pe_ratio = appleStock.slice(800);
+
+const stock = appleStock.slice(800);
 
 // util
 const formatDate = timeFormat("%b %d, '%y");
@@ -25,30 +25,8 @@ const bisectDate = bisector(d => new Date(d.date)).left;
 class SandP500_PE extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      s_and_p_500_pe_ratio: []
-    };
-
     this.handleTooltip = this.handleTooltip.bind(this);
   }
-
-  componentDidMount() {
-    axios
-      .get(
-        "https://www.quandl.com/api/v3/datasets/MULTPL/SP500_PE_RATIO_MONTH.json?api_key=xVgPxg_akYvyDdHhqEox"
-      )
-      .then(res => {
-        this.setState({
-          s_and_p_500_pe_ratio: res.data.dataset.data
-            .map(i => ({
-              date: i[0],
-              close: i[1]
-            }))
-            .reverse()
-        });
-      });
-  }
-
   handleTooltip({ event, data, xStock, xScale, yScale }) {
     const { showTooltip } = this.props;
     const { x } = localPoint(event);
@@ -92,19 +70,18 @@ class SandP500_PE extends React.Component {
     // scales
     const xScale = scaleTime({
       range: [0, xMax],
-      domain: extent(this.state.s_and_p_500_pe_ratio, xStock)
+      domain: extent(stock, xStock)
     });
     const yScale = scaleLinear({
       range: [yMax, 0],
-      domain: [0, max(this.state.s_and_p_500_pe_ratio, yStock) + yMax / 3],
+      domain: [0, max(stock, yStock) + yMax / 3],
       nice: true
     });
 
     return (
       <div>
         <svg ref={s => (this.svg = s)} width={width} height={height}>
-          {console.log("STOCK IS", this.state.s_and_p_500_pe_ratio)}
-          {console.log("FORMATTED STOCK IS", this.state.s_and_p_500_pe_ratio)}
+          {/*{console.log("DATA IS", stock)}*/}
           <rect
             x={0}
             y={0}
@@ -134,7 +111,7 @@ class SandP500_PE extends React.Component {
             stroke="rgba(255,255,255,0.3)"
           />
           <AreaClosed
-            data={this.state.s_and_p_500_pe_ratio}
+            data={stock}
             x={d => xScale(xStock(d))}
             y={d => yScale(yStock(d))}
             yScale={yScale}
@@ -150,14 +127,14 @@ class SandP500_PE extends React.Component {
             height={height}
             fill="transparent"
             rx={14}
-            data={this.state.s_and_p_500_pe_ratio}
+            data={stock}
             onTouchStart={event =>
               this.handleTooltip({
                 event,
                 xStock,
                 xScale,
                 yScale,
-                data: this.state.s_and_p_500_pe_ratio
+                data: stock
               })
             }
             onTouchMove={event =>
@@ -166,7 +143,7 @@ class SandP500_PE extends React.Component {
                 xStock,
                 xScale,
                 yScale,
-                data: this.state.s_and_p_500_pe_ratio
+                data: stock
               })
             }
             onMouseMove={event =>
@@ -175,7 +152,7 @@ class SandP500_PE extends React.Component {
                 xStock,
                 xScale,
                 yScale,
-                data: this.state.s_and_p_500_pe_ratio
+                data: stock
               })
             }
             onMouseLeave={event => hideTooltip()}

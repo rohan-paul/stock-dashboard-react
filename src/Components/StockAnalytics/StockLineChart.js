@@ -22,7 +22,7 @@ export class StockLineChart extends Component {
       },
       series: [
         {
-          name: "MSFT",
+          name: `${this.props.stockTicker}`,
           data: this.props.yAxisData,
           tooltip: {
             valueDecimals: 2
@@ -31,7 +31,7 @@ export class StockLineChart extends Component {
       ],
 
       title: {
-        text: "MSFT Stock Price"
+        text: `${this.props.stockTicker}`
       }
     };
     return (

@@ -240,6 +240,7 @@ export class StockAnalyticsDashBoard extends Component {
                 <StockLineChart
                   xAxisData={this.state.xAxisData}
                   yAxisData={this.state.yAxisData}
+                  stockTicker={this.state.stockTicker}
                 />
               </Typography>
             </Paper>
