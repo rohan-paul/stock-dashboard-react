@@ -47,7 +47,6 @@ export class ValuationRatios extends Component {
           this.props.ySeriesDataForValuationRatios
         )}
         <ReactHighChart config={config} />
-        );
       </div>
     );
   }

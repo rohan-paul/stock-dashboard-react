@@ -47,7 +47,6 @@ export class ProfitabilityRatios extends Component {
           this.props.ySeriesDataForProfitabilityRatios
         )}
         <ReactHighChart config={config} />
-        );
       </div>
     );
   }

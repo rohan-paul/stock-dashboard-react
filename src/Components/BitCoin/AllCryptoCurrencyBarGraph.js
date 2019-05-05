@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 const ReactHighChart = require("react-highcharts");
 
-export class DebtRatios extends Component {
+export class AllCryptoCurrencyBarGraph extends Component {
   render() {
     const config = {
       chart: {
@@ -24,10 +24,15 @@ export class DebtRatios extends Component {
       yAxis: {
         min: 0,
         title: {
-          text: "Numbers in ratio"
+          text: "Numbers in dollars"
         }
       },
-      series: this.props.ySeriesDataForDebtRatios,
+      series: [
+        {
+          name: "All Crypto Currency Latest Quotes",
+          data: this.props.allCryptocurrencyData
+        }
+      ],
 
       plotOptions: {
         column: {
@@ -37,16 +42,22 @@ export class DebtRatios extends Component {
       },
 
       title: {
-        text: `${this.props.stockTicker || "Stock Ticker"}`
+        text: `All Crypto Currency Latest Quotes`
+      },
+      subtitle: {
+        text:
+          'Source: <a href="https://financialmodelingprep.com/">financialmodelingprep.com</a>'
       }
     };
     return (
       <div>
-        {console.log("FUNDAMENTALS DEBT ", this.props.ySeriesDataForDebtRatios)}
+        {/*{console.log("CRYP DATA ", this.props.allCryptocurrencyData)}*/}
         <ReactHighChart config={config} />
       </div>
     );
   }
 }
 
-export default DebtRatios;
+export default AllCryptoCurrencyBarGraph;
+
+// {console.log("FORMATTED CRYP DATA", this.state.allCryptocurrencyData)}

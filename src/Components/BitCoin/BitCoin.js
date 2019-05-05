@@ -1,6 +1,7 @@
 import React from "react";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 import { AreaClosed, Line, Bar } from "@vx/shape";
-import { appleStock } from "@vx/mock-data";
 import { curveMonotoneX } from "@vx/curve";
 import { GridRows, GridColumns } from "@vx/grid";
 import { scaleTime, scaleLinear } from "@vx/scale";
@@ -10,7 +11,10 @@ import { bisector } from "d3-array";
 import { timeFormat } from "d3-time-format";
 import { Row, Col } from "reactstrap";
 import { styles } from "../commonStyles/ModuleItemListStyles";
+import axios from "axios";
 import { withStyles } from "@material-ui/core";
+import AllCryptoCurrencyBarGraph from "./AllCryptoCurrencyBarGraph";
+const omit = require("lodash.omit");
 
 // util
 const formatDate = timeFormat("%b %d, '%y");
@@ -20,12 +24,24 @@ const extent = (arr, fn) => [min(arr, fn), max(arr, fn)];
 
 // accessors
 const xStock = d => new Date(d.date);
-const yStock = d => d.close;
+const yStock = d => d && d.close;
 const bisectDate = bisector(d => new Date(d.date)).left;
+
+// Function to format the data received from "financialmodelingprep" for all crypto currency price
+const getDateAndClosingPrice = obj => {
+  let result = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      result.push([obj[key].name, obj[key].Price]);
+    }
+  }
+  return result;
+};
 
 class BitCoin extends React.Component {
   state = {
-    data: []
+    data: [],
+    allCryptocurrencyData: []
   };
 
   constructor(props) {
@@ -33,21 +49,31 @@ class BitCoin extends React.Component {
     this.handleTooltip = this.handleTooltip.bind(this);
   }
 
-  //   async componentDidMount() {
-  //     const res = await fetch(
-  //       "https://api.coindesk.com/v1/bpi/historical/close.json"
-  //     );
-  //     const data = await res.json();
+  async componentDidMount() {
+    const res = await fetch(
+      "https://api.coindesk.com/v1/bpi/historical/close.json"
+    );
+    const data = await res.json();
 
-  //     this.setState({
-  //       data: Object.keys(data.bpi).map(item => {
-  //         return {
-  //           date: item,
-  //           close: data.bpi[item]
-  //         };
-  //       })
-  //     });
-  //   }
+    axios
+      .get(`https://financialmodelingprep.com/api/cryptocurrency?datatype=json`)
+      .then(res => {
+        let crypData = omit(res.data, ["BTC"]);
+        // console.log("RECEIVED DATA ", crypData);
+        this.setState({
+          data: Object.keys(data.bpi).map(item => {
+            return {
+              date: item,
+              close: data && data.bpi && data.bpi[item]
+            };
+          }),
+          allCryptocurrencyData: getDateAndClosingPrice(crypData)
+        });
+      })
+      .catch(err => {
+        console.log("Error happened while fetching data", err);
+      });
+  }
 
   handleTooltip({ event, data, xStock, xScale, yScale }) {
     const { showTooltip } = this.props;
@@ -67,13 +93,13 @@ class BitCoin extends React.Component {
     });
   }
   render() {
-    const width = 500;
+    const width = 1200;
     const height = 250;
     const margin = {
       top: 60,
-      bottom: 20,
+      bottom: 2,
       left: 80,
-      right: 80
+      right: 0
     };
 
     const {
@@ -103,143 +129,159 @@ class BitCoin extends React.Component {
 
     return (
       <div style={{ overflowX: "auto" }} className={classes.root}>
-        <Row>
-          <Col xs="12" className={classes.root}>
-            <svg ref={s => (this.svg = s)} width={width} height={height}>
-              {/*{console.log("DATA IS", this.state.data)}*/}
-              <rect
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                fill="#32deaa"
-                rx={14}
-              />
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-              <GridRows
-                lineStyle={{ pointerEvents: "none" }}
-                scale={yScale}
-                width={xMax}
-                strokeDasharray="2,2"
-                stroke="rgba(255,255,255,0.3)"
-              />
-              <GridColumns
-                lineStyle={{ pointerEvents: "none" }}
-                scale={xScale}
-                height={yMax}
-                strokeDasharray="2,2"
-                stroke="rgba(255,255,255,0.3)"
-              />
-              <AreaClosed
-                data={this.state.data}
-                x={d => xScale(xStock(d))}
-                y={d => yScale(yStock(d))}
-                yScale={yScale}
-                strokeWidth={1}
-                stroke={"url(#gradient)"}
-                fill={"url(#gradient)"}
-                curve={curveMonotoneX}
-              />
-              <Bar
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                fill="transparent"
-                rx={14}
-                data={this.state.data}
-                onTouchStart={event =>
-                  this.handleTooltip({
-                    event,
-                    xStock,
-                    xScale,
-                    yScale,
-                    data: this.state.data
-                  })
-                }
-                onTouchMove={event =>
-                  this.handleTooltip({
-                    event,
-                    xStock,
-                    xScale,
-                    yScale,
-                    data: this.state.data
-                  })
-                }
-                onMouseMove={event =>
-                  this.handleTooltip({
-                    event,
-                    xStock,
-                    xScale,
-                    yScale,
-                    data: this.state.data
-                  })
-                }
-                onMouseLeave={event => hideTooltip()}
-              />
+        <Paper style={{ marginTop: "3%" }}>
+          <Typography variant="h5" component="h5">
+            Bit Coin Price Graph
+          </Typography>
+          <Row>
+            <Col xs="12" className={classes.root}>
+              <svg ref={s => (this.svg = s)} width={width} height={height}>
+                {/*{console.log("DATA IS", this.state.data)}*/}
+                <rect
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill="#32deaa"
+                  rx={14}
+                />
+                <defs>
+                  <linearGradient
+                    id="gradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0.2} />
+                  </linearGradient>
+                </defs>
+                <GridRows
+                  lineStyle={{ pointerEvents: "none" }}
+                  scale={yScale}
+                  width={xMax}
+                  strokeDasharray="2,2"
+                  stroke="rgba(255,255,255,0.3)"
+                />
+                <GridColumns
+                  lineStyle={{ pointerEvents: "none" }}
+                  scale={xScale}
+                  height={yMax}
+                  strokeDasharray="2,2"
+                  stroke="rgba(255,255,255,0.3)"
+                />
+                <AreaClosed
+                  data={this.state.data}
+                  x={d => xScale(xStock(d))}
+                  y={d => yScale(yStock(d))}
+                  yScale={yScale}
+                  strokeWidth={1}
+                  stroke={"url(#gradient)"}
+                  fill={"url(#gradient)"}
+                  curve={curveMonotoneX}
+                />
+                <Bar
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill="transparent"
+                  rx={14}
+                  data={this.state.data}
+                  onTouchStart={event =>
+                    this.handleTooltip({
+                      event,
+                      xStock,
+                      xScale,
+                      yScale,
+                      data: this.state.data
+                    })
+                  }
+                  onTouchMove={event =>
+                    this.handleTooltip({
+                      event,
+                      xStock,
+                      xScale,
+                      yScale,
+                      data: this.state.data
+                    })
+                  }
+                  onMouseMove={event =>
+                    this.handleTooltip({
+                      event,
+                      xStock,
+                      xScale,
+                      yScale,
+                      data: this.state.data
+                    })
+                  }
+                  onMouseLeave={event => hideTooltip()}
+                />
+                {tooltipData && (
+                  <g>
+                    <Line
+                      from={{ x: tooltipLeft, y: 0 }}
+                      to={{ x: tooltipLeft, y: yMax }}
+                      stroke="rgba(92, 119, 235, 1.000)"
+                      strokeWidth={2}
+                      style={{ pointerEvents: "none" }}
+                      strokeDasharray="2,2"
+                    />
+                    <circle
+                      cx={tooltipLeft}
+                      cy={tooltipTop + 1}
+                      r={4}
+                      fill="black"
+                      fillOpacity={0.1}
+                      stroke="black"
+                      strokeOpacity={0.1}
+                      strokeWidth={2}
+                      style={{ pointerEvents: "none" }}
+                    />
+                    <circle
+                      cx={tooltipLeft}
+                      cy={tooltipTop}
+                      r={4}
+                      fill="rgba(92, 119, 235, 1.000)"
+                      stroke="white"
+                      strokeWidth={2}
+                      style={{ pointerEvents: "none" }}
+                    />
+                  </g>
+                )}
+              </svg>
               {tooltipData && (
-                <g>
-                  <Line
-                    from={{ x: tooltipLeft, y: 0 }}
-                    to={{ x: tooltipLeft, y: yMax }}
-                    stroke="rgba(92, 119, 235, 1.000)"
-                    strokeWidth={2}
-                    style={{ pointerEvents: "none" }}
-                    strokeDasharray="2,2"
-                  />
-                  <circle
-                    cx={tooltipLeft}
-                    cy={tooltipTop + 1}
-                    r={4}
-                    fill="black"
-                    fillOpacity={0.1}
-                    stroke="black"
-                    strokeOpacity={0.1}
-                    strokeWidth={2}
-                    style={{ pointerEvents: "none" }}
-                  />
-                  <circle
-                    cx={tooltipLeft}
-                    cy={tooltipTop}
-                    r={4}
-                    fill="rgba(92, 119, 235, 1.000)"
-                    stroke="white"
-                    strokeWidth={2}
-                    style={{ pointerEvents: "none" }}
-                  />
-                </g>
+                <div>
+                  <Tooltip
+                    top={tooltipTop - 12}
+                    left={tooltipLeft + 12}
+                    style={{
+                      backgroundColor: "rgba(92, 119, 235, 1.000)",
+                      color: "white"
+                    }}
+                  >
+                    {`$${yStock(tooltipData)}`}
+                  </Tooltip>
+                  <Tooltip
+                    top={yMax - 14}
+                    left={tooltipLeft}
+                    style={{
+                      transform: "translateX(-50%)"
+                    }}
+                  >
+                    {formatDate(xStock(tooltipData))}
+                  </Tooltip>
+                </div>
               )}
-            </svg>
-            {tooltipData && (
-              <div>
-                <Tooltip
-                  top={tooltipTop - 12}
-                  left={tooltipLeft + 12}
-                  style={{
-                    backgroundColor: "rgba(92, 119, 235, 1.000)",
-                    color: "white"
-                  }}
-                >
-                  {`$${yStock(tooltipData)}`}
-                </Tooltip>
-                <Tooltip
-                  top={yMax - 14}
-                  left={tooltipLeft}
-                  style={{
-                    transform: "translateX(-50%)"
-                  }}
-                >
-                  {formatDate(xStock(tooltipData))}
-                </Tooltip>
-              </div>
-            )}
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+        </Paper>
+        <Paper style={{ marginTop: "2%" }}>
+          <AllCryptoCurrencyBarGraph
+            allCryptocurrencyData={this.state.allCryptocurrencyData}
+          />
+        </Paper>
       </div>
     );
   }
