@@ -432,7 +432,7 @@ export class StockAnalyticsDashBoard extends Component {
           <div>
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
-                Key Profitabilty matrix for past five years matrix{" "}
+                Key Debt matrix for past five years matrix{" "}
                 {this.state.stockTickerAndLabel}
                 <DebtRatios
                   ySeriesDataForDebtRatios={this.state.ySeriesDataForDebtRatios}
