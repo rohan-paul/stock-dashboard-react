@@ -1,5 +1,7 @@
 #### To launch the project, just run `npm install` and then `npm start`
 
+<img src="./Peek 2019-05-05 22-31.gif">
+
 #### Some notes on using [www.quandl.com/api](www.quandl.com/api)
 
 

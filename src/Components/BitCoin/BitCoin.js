@@ -32,7 +32,10 @@ const getDateAndClosingPrice = obj => {
   let result = [];
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
-      result.push([obj[key].name, obj[key].Price]);
+      // Filter out currencies that are too small in terms of their closing price
+      if (obj[key].Price > 20) {
+        result.push([obj[key].name, obj[key].Price]);
+      }
     }
   }
   return result;
@@ -59,6 +62,7 @@ class BitCoin extends React.Component {
       .get(`https://financialmodelingprep.com/api/cryptocurrency?datatype=json`)
       .then(res => {
         let crypData = omit(res.data, ["BTC"]);
+        // const crypData = res.data;
         // console.log("RECEIVED DATA ", crypData);
         this.setState({
           data: Object.keys(data.bpi).map(item => {

@@ -29,7 +29,7 @@ export class AllCryptoCurrencyBarGraph extends Component {
       },
       series: [
         {
-          name: "All Crypto Currency Latest Quotes",
+          name: "Other major Crypto Currency Latest Quotes",
           data: this.props.allCryptocurrencyData
         }
       ],
@@ -42,7 +42,7 @@ export class AllCryptoCurrencyBarGraph extends Component {
       },
 
       title: {
-        text: `All Crypto Currency Latest Quotes`
+        text: `Other major Crypto Currency Latest Quotes`
       },
       subtitle: {
         text:
