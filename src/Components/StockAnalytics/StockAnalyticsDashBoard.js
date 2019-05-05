@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import history from "../../history";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
@@ -7,7 +6,6 @@ import styles from "./Styles/analyticsStyles.js";
 import axios from "axios";
 import Typography from "@material-ui/core/Typography";
 import SandP500_PE from "./SandP500_PE";
-// import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import Select, { createFilter } from "react-select";
 import { FixedSizeList as List } from "react-window";
 import { MuiPickersUtilsProvider, DatePicker } from "material-ui-pickers";
@@ -17,8 +15,7 @@ import Icon from "@material-ui/core/Icon";
 import StockLineChart from "./StockLineChart";
 import ValuationRatios from "./ValuationRatios";
 import ProfitabilityRatios from "./ProfitabilityRatios";
-
-// const moment = require("moment");
+import DebtRatios from "./DebtRatios";
 
 const height = 35;
 
@@ -125,6 +122,41 @@ const getYSeriesDataProfitabilityMatrix = obj => {
   return [set1, set2, set3, set4, set5];
 };
 
+const getYSeriesDataDebtMatrix = obj => {
+  let set1,
+    set2,
+    set3,
+    set4 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].debtRatios]);
+    }
+  }
+  const debtRatio = yAxisSeries.map(i => i[1].debtRatio);
+  const debtEquityRatio = yAxisSeries.map(i => i[1].debtEquityRatio);
+  const totalDebtToCapitalization = yAxisSeries.map(
+    i => i[1].totalDebtToCapitalization
+  );
+  const companyEquityMultiplier = yAxisSeries.map(
+    i => i[1].companyEquityMultiplier
+  );
+
+  set1 = { name: "Debt Ratio", data: debtRatio };
+  set2 = { name: "Debt to Equity Ratio", data: debtEquityRatio };
+  set3 = {
+    name: "Total Debt To Capitalization ratio",
+    data: totalDebtToCapitalization
+  };
+  set4 = {
+    name: "Company Equity Multiplier",
+    data: companyEquityMultiplier
+  };
+
+  return [set1, set2, set3, set4];
+};
+
 export class StockAnalyticsDashBoard extends Component {
   state = {
     stockTicker: "",
@@ -137,7 +169,8 @@ export class StockAnalyticsDashBoard extends Component {
     shouldSandP_Data_fetch: false,
     ySeriesDataForValuationRatios: [],
     xSeriesDataForValuationRatios: [],
-    ySeriesDataForProfitabilityRatios: []
+    ySeriesDataForProfitabilityRatios: [],
+    ySeriesDataForDebtRatios: []
   };
 
   // Higher order function to handle Autocompletion field value change
@@ -199,6 +232,9 @@ export class StockAnalyticsDashBoard extends Component {
                 stockFundamentalsData.data.financialRatios
               ),
               ySeriesDataForProfitabilityRatios: getYSeriesDataProfitabilityMatrix(
+                stockFundamentalsData.data.financialRatios
+              ),
+              ySeriesDataForDebtRatios: getYSeriesDataDebtMatrix(
                 stockFundamentalsData.data.financialRatios
               ),
               shouldSandP_Data_fetch: true
@@ -393,6 +429,21 @@ export class StockAnalyticsDashBoard extends Component {
               </Typography>
             </Paper>
           </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                Key Profitabilty matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
+                <DebtRatios
+                  ySeriesDataForDebtRatios={this.state.ySeriesDataForDebtRatios}
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                  stockTicker={this.state.stockTicker}
+                />
+              </Typography>
+            </Paper>
+          </div>
         </React.Fragment>
       </MuiPickersUtilsProvider>
     );
@@ -423,13 +474,4 @@ var config = {
   }]
 };
 
-*/
-
-/*
-
-  ////////////////////////////
-  {console.log("SYMBOLS IS", this.state.tickerSelectedByUser)}
-          {console.log("START DATE IS", this.state.fromDate)}
-          {console.log("TO DATE IS", this.state.toDate)}
-          {console.log("X AXIS DATA ", this.state.xAxisData)}
 */

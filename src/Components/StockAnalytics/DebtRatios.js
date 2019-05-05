@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 const ReactHighChart = require("react-highcharts");
 
-export class ProfitabilityRatios extends Component {
+export class DebtRatios extends Component {
   render() {
     const config = {
       chart: {
@@ -27,7 +27,7 @@ export class ProfitabilityRatios extends Component {
           text: "Numbers in ratio"
         }
       },
-      series: this.props.ySeriesDataForProfitabilityRatios,
+      series: this.props.ySeriesDataForDebtRatios,
 
       plotOptions: {
         column: {
@@ -42,10 +42,7 @@ export class ProfitabilityRatios extends Component {
     };
     return (
       <div>
-        {console.log(
-          "FUNDAMENTALS PROFITABILITY ",
-          this.props.ySeriesDataForProfitabilityRatios
-        )}
+        {console.log("FUNDAMENTALS DEBT ", this.props.ySeriesDataForDebtRatios)}
         <ReactHighChart config={config} />
         );
       </div>
@@ -53,4 +50,4 @@ export class ProfitabilityRatios extends Component {
   }
 }
 
-export default ProfitabilityRatios;
+export default DebtRatios;
