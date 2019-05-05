@@ -15,6 +15,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import Button from "@material-ui/core/Button";
 import Icon from "@material-ui/core/Icon";
 import StockLineChart from "./StockLineChart";
+import ValuationRatios from "./ValuationRatios";
 // const moment = require("moment");
 
 const height = 35;
@@ -48,6 +49,33 @@ const convertDateFromStringToAPIFormat = str => {
   return [date.getFullYear(), month, day].join("-");
 };
 
+const getYSeriesData = obj => {
+  let set1,
+    set2,
+    set3 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].investmentValuationRatios]);
+    }
+  }
+  const arrPriceEarningRatio = yAxisSeries.map(i => i[1].priceEarningsRatio);
+  const arrPriceSalesRatio = yAxisSeries.map(i => i[1].priceSalesRatio);
+  const arrEnterpriseValueMultiple = yAxisSeries.map(
+    i => i[1].enterpriseValueMultiple
+  );
+
+  set1 = { name: "Price Earnings Ratio", data: arrPriceEarningRatio };
+  set2 = { name: "Price Sales Ratio", data: arrPriceSalesRatio };
+  set3 = {
+    name: "Enterprise Value Multiple",
+    data: arrEnterpriseValueMultiple
+  };
+
+  return [set1, set2, set3];
+};
+
 export class StockAnalyticsDashBoard extends Component {
   state = {
     stockTicker: "",
@@ -56,7 +84,10 @@ export class StockAnalyticsDashBoard extends Component {
     fromDate: "",
     toDate: "",
     xAxisData: [],
-    yAxisData: []
+    yAxisData: [],
+    shouldSandP_Data_fetch: false,
+    ySeriesDataForValuationRatios: [],
+    xSeriesDataForValuationRatios: []
   };
 
   // Higher order function to handle Autocompletion field value change
@@ -94,22 +125,33 @@ export class StockAnalyticsDashBoard extends Component {
     const APIkey = process.env.REACT_APP_QUANDL_API_KEY;
 
     if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
-      const url = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+      const url_stockPrice = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+
+      const url_stockFundamentalsValuationRatios = `https://financialmodelingprep.com/api/financial-ratios/${stockTicker}?datatype=json`;
 
       axios
-        .get(url)
-        .then(res => {
-          if (res.data.dataset.data.length !== 0) {
-            const receivedStockClosingData = res.data.dataset.data;
+        .all([
+          axios.get(url_stockPrice),
+          axios.get(url_stockFundamentalsValuationRatios)
+        ])
+        .then(
+          axios.spread((stockPriceData, stockFundamentalsData) => {
+            const receivedStockClosingData = stockPriceData.data.dataset.data;
             const closingPriceDate = receivedStockClosingData.map(i => i[0]);
             const closingPrice = receivedStockClosingData.map(i => i[1]);
-            console.log("RECEIVED DATA ", receivedStockClosingData);
             this.setState({
               xAxisData: closingPriceDate,
-              yAxisData: closingPrice
+              yAxisData: closingPrice,
+              ySeriesDataForValuationRatios: getYSeriesData(
+                stockFundamentalsData.data.financialRatios
+              ),
+              xSeriesDataForValuationRatios: Object.keys(
+                stockFundamentalsData.data.financialRatios
+              ),
+              shouldSandP_Data_fetch: true
             });
-          }
-        })
+          })
+        )
         .catch(function(error) {
           console.log(error);
         });
@@ -248,12 +290,29 @@ export class StockAnalyticsDashBoard extends Component {
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
                 S&P 500 P/E ratio during same time
-                {this.state.fromDate !== "" && this.state.toDate !== "" ? (
+                {this.state.fromDate !== "" &&
+                this.state.toDate !== "" &&
+                this.state.shouldSandP_Data_fetch === true ? (
                   <SandP500_PE
                     fromDate={this.state.fromDate}
                     toDate={this.state.toDate}
                   />
                 ) : null}
+              </Typography>
+            </Paper>
+          </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                S&P 500 P/E ratio during same time
+                <ValuationRatios
+                  ySeriesDataForValuationRatios={
+                    this.state.ySeriesDataForValuationRatios
+                  }
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                />
               </Typography>
             </Paper>
           </div>
