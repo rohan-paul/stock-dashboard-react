@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 const ReactHighChart = require("react-highcharts");
+const { ma, dma, ema, sma, wma } = require("moving-averages");
 
 export class ValuationRatios extends Component {
   render() {
@@ -28,7 +29,6 @@ export class ValuationRatios extends Component {
         }
       },
       series: this.props.ySeriesDataForValuationRatios,
-      ...this.props.yAxisData_StockClosingPrice,
       plotOptions: {
         column: {
           pointPadding: 0.2,
@@ -43,11 +43,11 @@ export class ValuationRatios extends Component {
     return (
       <div>
         {/* {console.log("X AXIS", this.props.xAxisData)}
-        {console.log("Y AXIS", this.props.yAxisData)}
+        {console.log("Y AXIS", this.props.yAxisData)}*/}
         {console.log(
           "FUNDAMENTALS Y-5 ",
           this.props.ySeriesDataForValuationRatios
-        )}*/}
+        )}
         <ReactHighChart config={config} />
         );
       </div>

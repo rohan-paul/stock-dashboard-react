@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 const ReactHighChart = require("react-highcharts");
+const { ma, dma, ema, sma, wma } = require("moving-averages");
 
 export class StockLineChart extends Component {
   render() {
@@ -8,9 +9,15 @@ export class StockLineChart extends Component {
         backgroundColor: {
           linearGradient: [0, 0, 500, 500],
           stops: [[0, "rgb(255, 255, 255)"], [1, "rgb(247, 247, 152)"]]
-        },
-        polar: true,
-        type: "line"
+        }
+      },
+      title: {
+        text: `Closing Price & 5-day Moving Averages ${this.props.stockTicker}`
+      },
+      yAxis: {
+        title: {
+          text: "Price in USD"
+        }
       },
       xAxis: {
         categories: this.props.xAxisData,
@@ -20,24 +27,52 @@ export class StockLineChart extends Component {
           rotation: "-45"
         }
       },
-      series: [
-        {
-          name: `${this.props.stockTicker}`,
-          data: this.props.yAxisData,
-          tooltip: {
-            valueDecimals: 2
+      legend: {
+        layout: "vertical",
+        align: "right",
+        verticalAlign: "middle"
+      },
+      plotOptions: {
+        series: {
+          label: {
+            connectorAllowed: false
           }
         }
+      },
+      series: [
+        {
+          name: `${this.props.stockTicker || "Closing Price"}`,
+          data: this.props.yAxisData_StockClosingPrice.reverse()
+        },
+        {
+          name: `Moving Averages`,
+          color: "red",
+          data: ma(this.props.yAxisData_StockClosingPrice, 5)
+            .slice(4)
+            .reverse()
+        }
       ],
-
-      title: {
-        text: `${this.props.stockTicker}`
+      responsive: {
+        rules: [
+          {
+            condition: {
+              maxWidth: 800
+            },
+            chartOptions: {
+              legend: {
+                layout: "horizontal",
+                align: "center",
+                verticalAlign: "bottom"
+              }
+            }
+          }
+        ]
       }
     };
     return (
       <div>
-        {console.log("X AXIS", this.props.xAxisData)}
-        {console.log("Y AXIS", this.props.yAxisData)}
+        {/*{console.log("X AXIS", this.props.xAxisData)}
+        {console.log("Y AXIS", this.props.yAxisData_StockClosingPrice)}*/}
         <ReactHighChart config={config} />
         );
       </div>

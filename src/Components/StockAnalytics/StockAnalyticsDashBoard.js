@@ -16,6 +16,7 @@ import Button from "@material-ui/core/Button";
 import Icon from "@material-ui/core/Icon";
 import StockLineChart from "./StockLineChart";
 import ValuationRatios from "./ValuationRatios";
+
 // const moment = require("moment");
 
 const height = 35;
@@ -52,7 +53,9 @@ const convertDateFromStringToAPIFormat = str => {
 const getYSeriesData = obj => {
   let set1,
     set2,
-    set3 = {};
+    set3,
+    set4,
+    set5 = {};
   let yAxisSeries = [];
 
   for (let key in obj) {
@@ -60,20 +63,29 @@ const getYSeriesData = obj => {
       yAxisSeries.push([key, obj[key].investmentValuationRatios]);
     }
   }
+  const priceBookValueRatio = yAxisSeries.map(i => i[1].priceBookValueRatio);
   const arrPriceEarningRatio = yAxisSeries.map(i => i[1].priceEarningsRatio);
   const arrPriceSalesRatio = yAxisSeries.map(i => i[1].priceSalesRatio);
   const arrEnterpriseValueMultiple = yAxisSeries.map(
     i => i[1].enterpriseValueMultiple
   );
+  const priceEarningsToGrowthRatio = yAxisSeries.map(
+    i => i[1].priceEarningsToGrowthRatio
+  );
 
-  set1 = { name: "Price Earnings Ratio", data: arrPriceEarningRatio };
-  set2 = { name: "Price Sales Ratio", data: arrPriceSalesRatio };
-  set3 = {
+  set1 = { name: "Price to Book-Value Ratio", data: priceBookValueRatio };
+  set2 = { name: "Price Earnings Ratio", data: arrPriceEarningRatio };
+  set3 = { name: "Price Sales Ratio", data: arrPriceSalesRatio };
+  set4 = {
     name: "Enterprise Value Multiple",
     data: arrEnterpriseValueMultiple
   };
+  set5 = {
+    name: "PriceEarnings To GrowthRatio",
+    data: priceEarningsToGrowthRatio
+  };
 
-  return [set1, set2, set3];
+  return [set1, set2, set3, set4, set5];
 };
 
 export class StockAnalyticsDashBoard extends Component {
@@ -84,7 +96,7 @@ export class StockAnalyticsDashBoard extends Component {
     fromDate: "",
     toDate: "",
     xAxisData: [],
-    yAxisData: [],
+    yAxisData_StockClosingPrice: [],
     shouldSandP_Data_fetch: false,
     ySeriesDataForValuationRatios: [],
     xSeriesDataForValuationRatios: []
@@ -141,7 +153,7 @@ export class StockAnalyticsDashBoard extends Component {
             const closingPrice = receivedStockClosingData.map(i => i[1]);
             this.setState({
               xAxisData: closingPriceDate,
-              yAxisData: closingPrice,
+              yAxisData_StockClosingPrice: closingPrice,
               ySeriesDataForValuationRatios: getYSeriesData(
                 stockFundamentalsData.data.financialRatios
               ),
@@ -278,10 +290,12 @@ export class StockAnalyticsDashBoard extends Component {
           >
             <Paper className={classes.bottomLeftPaper}>
               <Typography variant="h6" component="h6">
-                Selected Stock {this.state.stockTickerAndLabel}
+                End of Day Closing Price of {this.state.stockTickerAndLabel}
                 <StockLineChart
                   xAxisData={this.state.xAxisData}
-                  yAxisData={this.state.yAxisData}
+                  yAxisData_StockClosingPrice={
+                    this.state.yAxisData_StockClosingPrice
+                  }
                   stockTicker={this.state.stockTicker}
                 />
               </Typography>
@@ -289,7 +303,7 @@ export class StockAnalyticsDashBoard extends Component {
 
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
-                S&P 500 P/E ratio during same time
+                S&P 500 P/E index EOD closing price during same time
                 {this.state.fromDate !== "" &&
                 this.state.toDate !== "" &&
                 this.state.shouldSandP_Data_fetch === true ? (
@@ -304,13 +318,17 @@ export class StockAnalyticsDashBoard extends Component {
           <div>
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
-                S&P 500 P/E ratio during same time
+                Key Valuation ratios of {this.state.stockTickerAndLabel} for
+                past five years
                 <ValuationRatios
                   ySeriesDataForValuationRatios={
                     this.state.ySeriesDataForValuationRatios
                   }
                   xSeriesDataForValuationRatios={
                     this.state.xSeriesDataForValuationRatios
+                  }
+                  yAxisData_StockClosingPrice={
+                    this.state.yAxisData_StockClosingPrice
                   }
                 />
               </Typography>

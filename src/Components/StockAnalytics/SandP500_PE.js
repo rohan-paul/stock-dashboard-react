@@ -81,8 +81,8 @@ export class SandP500_PE extends Component {
     };
     return (
       <div>
-        {console.log("X DATA", closingDate)}
-        {console.log("Y DATA", s_and_p_500_index)}
+        {/*{console.log("X DATA", closingDate)}
+        {console.log("Y DATA", s_and_p_500_index)}*/}
         <ReactHighstock config={config} />
         );
       </div>
