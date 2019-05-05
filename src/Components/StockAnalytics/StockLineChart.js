@@ -12,7 +12,9 @@ export class StockLineChart extends Component {
         }
       },
       title: {
-        text: `Closing Price & 5-day Moving Averages ${this.props.stockTicker}`
+        text: `${
+          this.props.stockTicker
+        } only disadvantage for most stocks the "newest_available_date" is "2018-03-27" for thw Quandl Free API`
       },
       yAxis: {
         title: {

@@ -2,6 +2,17 @@
 
 #### Some notes on using [www.quandl.com/api](www.quandl.com/api)
 
+
+#### The main disadvantage, for thw Quandl Free API for most stocks the "newest_available_date" is "2018-03-27"
+
+[https://github.com/quantopian/zipline/issues/2145](https://github.com/quantopian/zipline/issues/2145)
+
+[https://github.com/quantopian/zipline/issues/22](https://github.com/quantopian/zipline/issues/22)
+
+```
+this is expected behavior as Quandl stopped updating their WIKI pricing dataset,
+```
+
 1> The main official doc is at -
 
 [https://docs.quandl.com/docs/in-depth-usage](https://docs.quandl.com/docs/in-depth-usage)
@@ -29,7 +40,7 @@ This column_index is the parameter that I have to fileter by for filitering ‘c
 
 So my final query becomes -
 
-[https://www.quandl.com/api/v3/datasets/WIKI/FB.json?&column_index=4&api_key=xVgPxg_akYvyDdHhqEox](https://www.quandl.com/api/v3/datasets/WIKI/FB.json?&column_index=4&api_key=xVgPxg_akYvyDdHhqEox)
+[https://www.quandl.com/api/v3/datasets/WIKI/FB.json?&column_index=4&api_key=xVgPxg_akYvyDdHhqEox](https://www.quandl.com/api/v3/datasets/WIKI/FB.json?&column_index=4&api_key=Your-API-KEY)
 
 And I get a ‘data’ field in the response as below
 
