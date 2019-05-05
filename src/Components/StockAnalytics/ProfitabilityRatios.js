@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 const ReactHighChart = require("react-highcharts");
-const { ma, dma, ema, sma, wma } = require("moving-averages");
 
-export class ValuationRatios extends Component {
+export class ProfitabilityRatios extends Component {
   render() {
     const config = {
       chart: {
@@ -28,7 +27,8 @@ export class ValuationRatios extends Component {
           text: "Numbers in ratio"
         }
       },
-      series: this.props.ySeriesDataForValuationRatios,
+      series: this.props.ySeriesDataForProfitabilityRatios,
+      ...this.props.yAxisData_StockClosingPrice,
       plotOptions: {
         column: {
           pointPadding: 0.2,
@@ -37,17 +37,17 @@ export class ValuationRatios extends Component {
       },
 
       title: {
-        text: `${this.props.stockTicker}`
+        text: `${this.props.stockTicker || "Stock Ticker"}`
       }
     };
     return (
       <div>
         {/* {console.log("X AXIS", this.props.xAxisData)}
-        {console.log("Y AXIS", this.props.yAxisData)}*/}
+        {console.log("Y AXIS", this.props.yAxisData)}
         {console.log(
           "FUNDAMENTALS Y-5 ",
-          this.props.ySeriesDataForValuationRatios
-        )}
+          this.props.ySeriesDataForProfitabilityRatios
+        )}*/}
         <ReactHighChart config={config} />
         );
       </div>
@@ -55,4 +55,4 @@ export class ValuationRatios extends Component {
   }
 }
 
-export default ValuationRatios;
+export default ProfitabilityRatios;

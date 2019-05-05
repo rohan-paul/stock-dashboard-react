@@ -16,6 +16,7 @@ import Button from "@material-ui/core/Button";
 import Icon from "@material-ui/core/Icon";
 import StockLineChart from "./StockLineChart";
 import ValuationRatios from "./ValuationRatios";
+import ProfitabilityRatios from "./ProfitabilityRatios";
 
 // const moment = require("moment");
 
@@ -50,7 +51,7 @@ const convertDateFromStringToAPIFormat = str => {
   return [date.getFullYear(), month, day].join("-");
 };
 
-const getYSeriesData = obj => {
+const getYSeriesDataValuationMatrix = obj => {
   let set1,
     set2,
     set3,
@@ -88,6 +89,42 @@ const getYSeriesData = obj => {
   return [set1, set2, set3, set4, set5];
 };
 
+const getYSeriesDataProfitabilityMatrix = obj => {
+  let set1,
+    set2,
+    set3,
+    set4,
+    set5 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].profitabilityIndicatorRatios]);
+    }
+  }
+  const grossProfitMargin = yAxisSeries.map(i => i[1].grossProfitMargin);
+  const operatingProfitMargin = yAxisSeries.map(
+    i => i[1].operatingProfitMargin
+  );
+  const netProfitMargin = yAxisSeries.map(i => i[1].netProfitMargin);
+  const returnOnEquity = yAxisSeries.map(i => i[1].returnOnEquity);
+  const eBITperRevenue = yAxisSeries.map(i => i[1].eBITperRevenue);
+
+  set1 = { name: "Gross Profit Margin", data: grossProfitMargin };
+  set2 = { name: "Operating Profit Margin", data: operatingProfitMargin };
+  set3 = { name: "Net Profit Margin", data: netProfitMargin };
+  set4 = {
+    name: "Return on Equity",
+    data: returnOnEquity
+  };
+  set5 = {
+    name: "EBIT per Revenue",
+    data: eBITperRevenue
+  };
+
+  return [set1, set2, set3, set4, set5];
+};
+
 export class StockAnalyticsDashBoard extends Component {
   state = {
     stockTicker: "",
@@ -99,7 +136,8 @@ export class StockAnalyticsDashBoard extends Component {
     yAxisData_StockClosingPrice: [],
     shouldSandP_Data_fetch: false,
     ySeriesDataForValuationRatios: [],
-    xSeriesDataForValuationRatios: []
+    xSeriesDataForValuationRatios: [],
+    ySeriesDataForProfitabilityRatios: []
   };
 
   // Higher order function to handle Autocompletion field value change
@@ -154,10 +192,13 @@ export class StockAnalyticsDashBoard extends Component {
             this.setState({
               xAxisData: closingPriceDate,
               yAxisData_StockClosingPrice: closingPrice,
-              ySeriesDataForValuationRatios: getYSeriesData(
+              ySeriesDataForValuationRatios: getYSeriesDataValuationMatrix(
                 stockFundamentalsData.data.financialRatios
               ),
               xSeriesDataForValuationRatios: Object.keys(
+                stockFundamentalsData.data.financialRatios
+              ),
+              ySeriesDataForProfitabilityRatios: getYSeriesDataProfitabilityMatrix(
                 stockFundamentalsData.data.financialRatios
               ),
               shouldSandP_Data_fetch: true
@@ -318,8 +359,8 @@ export class StockAnalyticsDashBoard extends Component {
           <div>
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
-                Key Valuation ratios of {this.state.stockTickerAndLabel} for
-                past five years
+                Key Valuation matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
                 <ValuationRatios
                   ySeriesDataForValuationRatios={
                     this.state.ySeriesDataForValuationRatios
@@ -330,6 +371,24 @@ export class StockAnalyticsDashBoard extends Component {
                   yAxisData_StockClosingPrice={
                     this.state.yAxisData_StockClosingPrice
                   }
+                  stockTicker={this.state.stockTicker}
+                />
+              </Typography>
+            </Paper>
+          </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                Key Profitabilty matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
+                <ProfitabilityRatios
+                  ySeriesDataForProfitabilityRatios={
+                    this.state.ySeriesDataForProfitabilityRatios
+                  }
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                  stockTicker={this.state.stockTicker}
                 />
               </Typography>
             </Paper>

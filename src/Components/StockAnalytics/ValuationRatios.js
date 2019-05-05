@@ -37,7 +37,7 @@ export class ValuationRatios extends Component {
       },
 
       title: {
-        text: `${this.props.stockTicker}`
+        text: `${this.props.stockTicker || "Stock Ticker"}`
       }
     };
     return (
