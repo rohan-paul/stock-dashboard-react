@@ -8,7 +8,7 @@ A stock-analytics dashboard with React, Highcharts, @vx (charting lib) and usinn
 
 #### Some notes on using [www.quandl.com/api](www.quandl.com/api) - I ultimately did not use Quandl as its free API gives old data
 
-#### The main disadvantage, for thw Quandl Free API for most stocks the "newest_available_date" is "2018-03-27"
+#### The main disadvantage, of Quandl Free API is that most stocks the "newest_available_date" is "2018-03-27"
 
 [https://github.com/quantopian/zipline/issues/2145](https://github.com/quantopian/zipline/issues/2145)
 
