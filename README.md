@@ -2,6 +2,8 @@
 
 <img src="./Peek 2019-05-05 22-31.gif">
 
+### [Live Demo](https://stock-analytics-dashboard.netlify.com/)
+
 #### Some notes on using [www.quandl.com/api](www.quandl.com/api)
 
 
