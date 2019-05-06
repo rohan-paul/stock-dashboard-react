@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import history from "../../history";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
@@ -7,7 +6,6 @@ import styles from "./Styles/analyticsStyles.js";
 import axios from "axios";
 import Typography from "@material-ui/core/Typography";
 import SandP500_PE from "./SandP500_PE";
-// import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import Select, { createFilter } from "react-select";
 import { FixedSizeList as List } from "react-window";
 import { MuiPickersUtilsProvider, DatePicker } from "material-ui-pickers";
@@ -15,7 +13,9 @@ import DateFnsUtils from "@date-io/date-fns";
 import Button from "@material-ui/core/Button";
 import Icon from "@material-ui/core/Icon";
 import StockLineChart from "./StockLineChart";
-// const moment = require("moment");
+import ValuationRatios from "./ValuationRatios";
+import ProfitabilityRatios from "./ProfitabilityRatios";
+import DebtRatios from "./DebtRatios";
 
 const height = 35;
 
@@ -48,6 +48,115 @@ const convertDateFromStringToAPIFormat = str => {
   return [date.getFullYear(), month, day].join("-");
 };
 
+const getYSeriesDataValuationMatrix = obj => {
+  let set1,
+    set2,
+    set3,
+    set4,
+    set5 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].investmentValuationRatios]);
+    }
+  }
+  const priceBookValueRatio = yAxisSeries.map(i => i[1].priceBookValueRatio);
+  const arrPriceEarningRatio = yAxisSeries.map(i => i[1].priceEarningsRatio);
+  const arrPriceSalesRatio = yAxisSeries.map(i => i[1].priceSalesRatio);
+  const arrEnterpriseValueMultiple = yAxisSeries.map(
+    i => i[1].enterpriseValueMultiple
+  );
+  const priceEarningsToGrowthRatio = yAxisSeries.map(
+    i => i[1].priceEarningsToGrowthRatio
+  );
+
+  set1 = { name: "Price to Book-Value Ratio", data: priceBookValueRatio };
+  set2 = { name: "Price Earnings Ratio", data: arrPriceEarningRatio };
+  set3 = { name: "Price Sales Ratio", data: arrPriceSalesRatio };
+  set4 = {
+    name: "Enterprise Value Multiple",
+    data: arrEnterpriseValueMultiple
+  };
+  set5 = {
+    name: "PriceEarnings To GrowthRatio",
+    data: priceEarningsToGrowthRatio
+  };
+
+  return [set1, set2, set3, set4, set5];
+};
+
+const getYSeriesDataProfitabilityMatrix = obj => {
+  let set1,
+    set2,
+    set3,
+    set4,
+    set5 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].profitabilityIndicatorRatios]);
+    }
+  }
+  const grossProfitMargin = yAxisSeries.map(i => i[1].grossProfitMargin);
+  const operatingProfitMargin = yAxisSeries.map(
+    i => i[1].operatingProfitMargin
+  );
+  const netProfitMargin = yAxisSeries.map(i => i[1].netProfitMargin);
+  const returnOnEquity = yAxisSeries.map(i => i[1].returnOnEquity);
+  const eBITperRevenue = yAxisSeries.map(i => i[1].eBITperRevenue);
+
+  set1 = { name: "Gross Profit Margin", data: grossProfitMargin };
+  set2 = { name: "Operating Profit Margin", data: operatingProfitMargin };
+  set3 = { name: "Net Profit Margin", data: netProfitMargin };
+  set4 = {
+    name: "Return on Equity",
+    data: returnOnEquity
+  };
+  set5 = {
+    name: "EBIT per Revenue",
+    data: eBITperRevenue
+  };
+
+  return [set1, set2, set3, set4, set5];
+};
+
+const getYSeriesDataDebtMatrix = obj => {
+  let set1,
+    set2,
+    set3,
+    set4 = {};
+  let yAxisSeries = [];
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yAxisSeries.push([key, obj[key].debtRatios]);
+    }
+  }
+  const debtRatio = yAxisSeries.map(i => i[1].debtRatio);
+  const debtEquityRatio = yAxisSeries.map(i => i[1].debtEquityRatio);
+  const totalDebtToCapitalization = yAxisSeries.map(
+    i => i[1].totalDebtToCapitalization
+  );
+  const companyEquityMultiplier = yAxisSeries.map(
+    i => i[1].companyEquityMultiplier
+  );
+
+  set1 = { name: "Debt Ratio", data: debtRatio };
+  set2 = { name: "Debt to Equity Ratio", data: debtEquityRatio };
+  set3 = {
+    name: "Total Debt To Capitalization ratio",
+    data: totalDebtToCapitalization
+  };
+  set4 = {
+    name: "Company Equity Multiplier",
+    data: companyEquityMultiplier
+  };
+
+  return [set1, set2, set3, set4];
+};
+
 export class StockAnalyticsDashBoard extends Component {
   state = {
     stockTicker: "",
@@ -56,7 +165,12 @@ export class StockAnalyticsDashBoard extends Component {
     fromDate: "",
     toDate: "",
     xAxisData: [],
-    yAxisData: []
+    yAxisData_StockClosingPrice: [],
+    shouldSandP_Data_fetch: false,
+    ySeriesDataForValuationRatios: [],
+    xSeriesDataForValuationRatios: [],
+    ySeriesDataForProfitabilityRatios: [],
+    ySeriesDataForDebtRatios: []
   };
 
   // Higher order function to handle Autocompletion field value change
@@ -94,22 +208,39 @@ export class StockAnalyticsDashBoard extends Component {
     const APIkey = process.env.REACT_APP_QUANDL_API_KEY;
 
     if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
-      const url = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+      const url_stockPrice = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+
+      const url_stockFundamentalsValuationRatios = `https://financialmodelingprep.com/api/financial-ratios/${stockTicker}?datatype=json`;
 
       axios
-        .get(url)
-        .then(res => {
-          if (res.data.dataset.data.length !== 0) {
-            const receivedStockClosingData = res.data.dataset.data;
+        .all([
+          axios.get(url_stockPrice),
+          axios.get(url_stockFundamentalsValuationRatios)
+        ])
+        .then(
+          axios.spread((stockPriceData, stockFundamentalsData) => {
+            const receivedStockClosingData = stockPriceData.data.dataset.data;
             const closingPriceDate = receivedStockClosingData.map(i => i[0]);
             const closingPrice = receivedStockClosingData.map(i => i[1]);
-            console.log("RECEIVED DATA ", receivedStockClosingData);
             this.setState({
               xAxisData: closingPriceDate,
-              yAxisData: closingPrice
+              yAxisData_StockClosingPrice: closingPrice,
+              ySeriesDataForValuationRatios: getYSeriesDataValuationMatrix(
+                stockFundamentalsData.data.financialRatios
+              ),
+              xSeriesDataForValuationRatios: Object.keys(
+                stockFundamentalsData.data.financialRatios
+              ),
+              ySeriesDataForProfitabilityRatios: getYSeriesDataProfitabilityMatrix(
+                stockFundamentalsData.data.financialRatios
+              ),
+              ySeriesDataForDebtRatios: getYSeriesDataDebtMatrix(
+                stockFundamentalsData.data.financialRatios
+              ),
+              shouldSandP_Data_fetch: true
             });
-          }
-        })
+          })
+        )
         .catch(function(error) {
           console.log(error);
         });
@@ -236,10 +367,12 @@ export class StockAnalyticsDashBoard extends Component {
           >
             <Paper className={classes.bottomLeftPaper}>
               <Typography variant="h6" component="h6">
-                Selected Stock {this.state.stockTickerAndLabel}
+                End of Day Closing Price of {this.state.stockTickerAndLabel}
                 <StockLineChart
                   xAxisData={this.state.xAxisData}
-                  yAxisData={this.state.yAxisData}
+                  yAxisData_StockClosingPrice={
+                    this.state.yAxisData_StockClosingPrice
+                  }
                   stockTicker={this.state.stockTicker}
                 />
               </Typography>
@@ -247,13 +380,67 @@ export class StockAnalyticsDashBoard extends Component {
 
             <Paper className={classes.bottomRightPaper}>
               <Typography variant="h6" component="h6">
-                S&P 500 P/E ratio during same time
-                {this.state.fromDate !== "" && this.state.toDate !== "" ? (
+                S&P 500 P/E index EOD closing price during same time
+                {this.state.fromDate !== "" &&
+                this.state.toDate !== "" &&
+                this.state.shouldSandP_Data_fetch === true ? (
                   <SandP500_PE
                     fromDate={this.state.fromDate}
                     toDate={this.state.toDate}
                   />
                 ) : null}
+              </Typography>
+            </Paper>
+          </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                Key Valuation matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
+                <ValuationRatios
+                  ySeriesDataForValuationRatios={
+                    this.state.ySeriesDataForValuationRatios
+                  }
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                  yAxisData_StockClosingPrice={
+                    this.state.yAxisData_StockClosingPrice
+                  }
+                  stockTicker={this.state.stockTicker}
+                />
+              </Typography>
+            </Paper>
+          </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                Key Profitabilty matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
+                <ProfitabilityRatios
+                  ySeriesDataForProfitabilityRatios={
+                    this.state.ySeriesDataForProfitabilityRatios
+                  }
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                  stockTicker={this.state.stockTicker}
+                />
+              </Typography>
+            </Paper>
+          </div>
+          <div>
+            <Paper className={classes.bottomRightPaper}>
+              <Typography variant="h6" component="h6">
+                Key Debt matrix for past five years matrix{" "}
+                {this.state.stockTickerAndLabel}
+                <DebtRatios
+                  ySeriesDataForDebtRatios={this.state.ySeriesDataForDebtRatios}
+                  xSeriesDataForValuationRatios={
+                    this.state.xSeriesDataForValuationRatios
+                  }
+                  stockTicker={this.state.stockTicker}
+                />
               </Typography>
             </Paper>
           </div>
@@ -287,13 +474,4 @@ var config = {
   }]
 };
 
-*/
-
-/*
-
-  ////////////////////////////
-  {console.log("SYMBOLS IS", this.state.tickerSelectedByUser)}
-          {console.log("START DATE IS", this.state.fromDate)}
-          {console.log("TO DATE IS", this.state.toDate)}
-          {console.log("X AXIS DATA ", this.state.xAxisData)}
 */

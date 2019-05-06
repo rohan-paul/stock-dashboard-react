@@ -21,6 +21,36 @@ export class SandP500_PE extends Component {
     closingDate: ""
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.props.fromDate !== prevProps.fromDate ||
+      this.props.toDate !== prevProps.toDate
+    ) {
+      const { fromDate, toDate } = this.props;
+      const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
+
+      const url = `https://www.worldtradingdata.com/api/v1/history?symbol=^INX&date_from=${fromDate}&date_to=${toDate}&sort=newest&api_token=${APIkey}`;
+
+      if (fromDate !== "" && toDate !== "") {
+        axios
+          .get(url)
+          .then(res => {
+            if (
+              res.data &&
+              res.data.history &&
+              Object.entries(res.data.history).length !== 0
+            ) {
+              this.setState({
+                closingDate: getDateAndClosingPrice(res.data.history)[0],
+                s_and_p_500_index: getDateAndClosingPrice(res.data.history)[1]
+              });
+            }
+          })
+          .catch(err => console.log("Error while fetching data ", err));
+      }
+    }
+  }
+
   componentDidMount() {
     const { fromDate, toDate } = this.props;
     const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
@@ -45,6 +75,7 @@ export class SandP500_PE extends Component {
         .catch(err => console.log("Error while fetching data ", err));
     }
   }
+
   render() {
     const { s_and_p_500_index, closingDate } = this.state;
 

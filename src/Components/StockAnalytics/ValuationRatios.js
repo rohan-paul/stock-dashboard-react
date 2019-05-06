@@ -42,10 +42,10 @@ export class ValuationRatios extends Component {
     };
     return (
       <div>
-        {console.log(
+        {/*{console.log(
           "FUNDAMENTALS VALUATION ",
           this.props.ySeriesDataForValuationRatios
-        )}
+        )}*/}
         <ReactHighChart config={config} />
       </div>
     );

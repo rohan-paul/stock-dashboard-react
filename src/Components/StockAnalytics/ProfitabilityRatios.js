@@ -42,10 +42,10 @@ export class ProfitabilityRatios extends Component {
     };
     return (
       <div>
-        {console.log(
+        {/* {console.log(
           "FUNDAMENTALS PROFITABILITY ",
           this.props.ySeriesDataForProfitabilityRatios
-        )}
+        )}*/}
         <ReactHighChart config={config} />
       </div>
     );

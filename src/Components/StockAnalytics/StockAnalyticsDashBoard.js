@@ -48,6 +48,18 @@ const convertDateFromStringToAPIFormat = str => {
   return [date.getFullYear(), month, day].join("-");
 };
 
+const getDateAndClosingPrice = obj => {
+  let date = [];
+  let closingPrice = [];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      date.push(key);
+      closingPrice.push(parseInt(obj[key].close));
+    }
+  }
+  return [date, closingPrice];
+};
+
 const getYSeriesDataValuationMatrix = obj => {
   let set1,
     set2,
@@ -203,12 +215,45 @@ export class StockAnalyticsDashBoard extends Component {
       });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      (this.state.fromDate !== prevState.fromDate &&
+        this.state.shouldSandP_Data_fetch) ||
+      (this.state.toDate !== prevState.toDate &&
+        this.state.shouldSandP_Data_fetch)
+    ) {
+      const { stockTicker, fromDate, toDate } = this.state;
+      const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
+
+      if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
+        const url_stockPrice = `https://www.worldtradingdata.com/api/v1/history?symbol=${stockTicker}&date_from=${fromDate}&date_to=${toDate}&output=json&sort=newest&api_token=${APIkey}`;
+
+        axios
+          .get(url_stockPrice)
+          .then(res => {
+            const closingPriceDate = getDateAndClosingPrice(
+              res.data.history
+            )[0];
+            const closingPrice = getDateAndClosingPrice(res.data.history)[1];
+            this.setState({
+              xAxisData: closingPriceDate,
+              yAxisData_StockClosingPrice: closingPrice,
+              shouldSandP_Data_fetch: true
+            });
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+      }
+    }
+  }
+
   handleSubmitToFetchAPI = () => {
     const { stockTicker, fromDate, toDate } = this.state;
-    const APIkey = process.env.REACT_APP_QUANDL_API_KEY;
+    const APIkey = process.env.REACT_APP_WORLD_TRADING_DATA_API_TOKEN;
 
     if (stockTicker !== "" && fromDate !== "" && toDate !== "") {
-      const url_stockPrice = `https://www.quandl.com/api/v3/datasets/WIKI/${stockTicker}.json?start_date=${fromDate}&end_date=${toDate}&column_index=4&api_key=${APIkey}`;
+      const url_stockPrice = `https://www.worldtradingdata.com/api/v1/history?symbol=${stockTicker}&date_from=${fromDate}&date_to=${toDate}&output=json&sort=newest&api_token=${APIkey}`;
 
       const url_stockFundamentalsValuationRatios = `https://financialmodelingprep.com/api/financial-ratios/${stockTicker}?datatype=json`;
 
@@ -219,9 +264,13 @@ export class StockAnalyticsDashBoard extends Component {
         ])
         .then(
           axios.spread((stockPriceData, stockFundamentalsData) => {
-            const receivedStockClosingData = stockPriceData.data.dataset.data;
-            const closingPriceDate = receivedStockClosingData.map(i => i[0]);
-            const closingPrice = receivedStockClosingData.map(i => i[1]);
+            console.log("RECEIVED DATA ", stockPriceData.data.history);
+            const closingPriceDate = getDateAndClosingPrice(
+              stockPriceData.data.history
+            )[0];
+            const closingPrice = getDateAndClosingPrice(
+              stockPriceData.data.history
+            )[1];
             this.setState({
               xAxisData: closingPriceDate,
               yAxisData_StockClosingPrice: closingPrice,
@@ -279,6 +328,7 @@ export class StockAnalyticsDashBoard extends Component {
 
     return (
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        {console.log("CLOSING PRICE ", this.state.yAxisData_StockClosingPrice)}
         <React.Fragment>
           <Paper className={classes.topSearchBarPaper}>
             <div className={classes.reactSelectAndDatePicker}>

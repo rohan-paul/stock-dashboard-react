@@ -42,7 +42,7 @@ export class DebtRatios extends Component {
     };
     return (
       <div>
-        {console.log("FUNDAMENTALS DEBT ", this.props.ySeriesDataForDebtRatios)}
+        {/*{console.log("FUNDAMENTALS DEBT ", this.props.ySeriesDataForDebtRatios)}*/}
         <ReactHighChart config={config} />
       </div>
     );

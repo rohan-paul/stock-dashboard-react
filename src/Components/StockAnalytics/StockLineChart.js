@@ -12,9 +12,9 @@ export class StockLineChart extends Component {
         }
       },
       title: {
-        text: `${
+        text: `Showing end of day closing price and 5-day moving average for stock ${
           this.props.stockTicker
-        } only disadvantage for most stocks the "newest_available_date" is "2018-03-27" for thw Quandl Free API`
+        } `
       },
       yAxis: {
         title: {
@@ -76,7 +76,6 @@ export class StockLineChart extends Component {
         {/*{console.log("X AXIS", this.props.xAxisData)}
         {console.log("Y AXIS", this.props.yAxisData_StockClosingPrice)}*/}
         <ReactHighChart config={config} />
-        );
       </div>
     );
   }

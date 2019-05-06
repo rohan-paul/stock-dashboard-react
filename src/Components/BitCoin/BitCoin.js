@@ -93,7 +93,7 @@ class BitCoin extends React.Component {
     showTooltip({
       tooltipData: d,
       tooltipLeft: x,
-      tooltipTop: yScale(d.close)
+      tooltipTop: d && yScale(d.close)
     });
   }
   render() {
