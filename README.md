@@ -4,8 +4,9 @@
 
 ### [Live Demo](https://stock-analytics-dashboard.netlify.com/)
 
-#### Some notes on using [www.quandl.com/api](www.quandl.com/api)
+A stock-analytics dashboard with React, Highcharts, @vx (charting lib) and usinng finnancial analytics API data from - [www.worldtradingdata.com](www.worldtradingdata.com), api.iextrading.com and financialmodelingprep.com
 
+#### Some notes on using [www.quandl.com/api](www.quandl.com/api) - I ultimately did not use Quandl as its free API gives old data
 
 #### The main disadvantage, for thw Quandl Free API for most stocks the "newest_available_date" is "2018-03-27"
 
@@ -27,7 +28,7 @@ this is expected behavior as Quandl stopped updating their WIKI pricing dataset,
 
 "column_names": ["Date", "Open", "High", "Low", "Close", "Volume", "Ex-Dividend", "Split Ratio", "Adj. Open", "Adj. High", "Adj. Low", "Adj. Close", "Adj. Volume"],
 
- I only want the field for ‘Close’
+I only want the field for ‘Close’
 
 The above page ( [https://docs.quandl.com/docs/in-depth-usage](https://docs.quandl.com/docs/in-depth-usage)) says -
 “You can slice, transform and otherwise customize your time-series dataset prior to download by appending various optional parameters to your query.”
@@ -38,7 +39,7 @@ And now when I click on the hyperlink - ‘parameters’ it takes me to -
 
 Here, I have
 
-column_index	 - Request a specific column. Column 0 is the date column and is always returned. Data begins at column 1.
+column_index - Request a specific column. Column 0 is the date column and is always returned. Data begins at column 1.
 
 This column_index is the parameter that I have to fileter by for filitering ‘column_names’ array in the response data.
 
@@ -49,8 +50,8 @@ So my final query becomes -
 And I get a ‘data’ field in the response as below
 
 "data": [
-            ["2018-03-27", 152.19],
-            ["2018-03-26", 160.06],
-	...
-	...
+["2018-03-27", 152.19],
+["2018-03-26", 160.06],
+...
+...
 ]
