@@ -1,4 +1,10 @@
-#### To launch the project, just run `npm install` and then `npm start`
+#### To launch the project, first you need to get the API-Key's from [worldtradingdata.com](www.worldtradingdata.com). Each API request is authenticated with your own personal API token which you can obtain for free by signing up. Currently you can make 250 free api request per day with their free scheme.
+
+Then create a .env file at the project root and assign the API-key to the relevant variable like below. (The key you are seeing below is NOT an actual one, its just for example)
+
+`REACT_APP_WORLD_TRADING_DATA_API_TOKEN=CO9qj6546546arefvref144565ethbdszgffd`
+
+Then just run `npm install` and then `npm start`
 
 <img src="./Peek 2019-05-05 22-31.gif">
 
