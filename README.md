@@ -1,4 +1,6 @@
-#### To launch the project, first you need to get the API-Key's from [worldtradingdata.com](www.worldtradingdata.com). Each API request is authenticated with your own personal API token which you can obtain for free by signing up. Currently you can make 250 free api request per day with their free scheme.
+### [Live Demo](https://stock-analytics-dashboard.netlify.com/)
+
+#### To run the project in local machine, first you need to get the API-Key's from [worldtradingdata.com](www.worldtradingdata.com). Each API request is authenticated with your own personal API token which you can obtain for free by signing up. Currently you can make 250 free api request per day with their free scheme.
 
 Then create a .env file at the project root and assign the API-key to the relevant variable like below. (The key you are seeing below is NOT an actual one, its just for example)
 
@@ -7,8 +9,6 @@ Then create a .env file at the project root and assign the API-key to the releva
 Then just run `npm install` and then `npm start`
 
 <img src="./Peek 2019-05-05 22-31.gif">
-
-### [Live Demo](https://stock-analytics-dashboard.netlify.com/)
 
 A stock-analytics dashboard with React, Highcharts, @vx (charting lib) and usinng finnancial analytics API data from - [www.worldtradingdata.com](www.worldtradingdata.com), api.iextrading.com and financialmodelingprep.com
 
