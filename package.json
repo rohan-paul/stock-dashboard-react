@@ -47,7 +47,7 @@
         "newsapi": "^2.4.0",
         "nock": "^10.0.6",
         "npm": "^6.7.0",
-        "papaparse": "^4.6.3",
+        "papaparse": "^5.2.0",
         "prettier-eslint-cli": "^4.7.1",
         "prettier-stylelint": "^0.4.2",
         "prop-types": "^15.6.2",
